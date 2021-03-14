@@ -53,7 +53,9 @@ void setup() {
   //  if (tubeIndexArray[tubeIndex][1] == 1) {
   //    plateUse = true;
   //  }
+  // this should when a certain condition is met
   plateUse = true;
+}
 
 }
 
@@ -62,129 +64,93 @@ void loop() {
   // Condition to test for connection from processing
   if (flagStart == 0) {
     TestConfigContact();  // Read Serial port to trigger test of lights
-  }
-
-  if (flagStart == 1) {
-    testTubeStatus(); // Update tube status
-    mpr121_sensor(); // Update Sensors
-
-    // Write serial data
-    // Send information to processing
-    Serial.print('H'); // unique header to identify start of message
-    Serial.print(",");
+    // used to disable plate
     for (uint8_t i = 0; i < 3; i++) {
-      Serial.print(licksRT[i]); Serial.print(",");
-      Serial.print(flag[i]); Serial.print(",");
-    }
-    Serial.println();
-
-    // check for plate reset
-    if (plateUse == true) {
-      if (validTrial == false) {
-        analogWrite(ledMotor[1], powerLED); // if trial is inactive plate light is ON
-      }
-      currentPlateState = cap.touched() & (1 << 1); // get state of pin 1
-      checkPlateChange();
-      if (plateChange == true && validTrial == false) {
-        plateTimer();
-      }
-      if (totalPlateTime >= timeForReset && validTrial == false) {
-        validTrial = true; // trial now valid
-        totalPlateTime = 0; // counter is reseted
-      }
-      else
-      {
-        totalPlateTime = 0; // counter is reseted, this avoids non-intentional resets
-      }
-      lastPlateState = currentPlateState;
+      blockPlate[i] = flagActive[i];
     }
 
-    if (validTrial == true) {
+    if (flagStart == 1) {
+      testTubeStatus(); // Update tube status
+      mpr121_sensor(); // Update Sensors
+
+      // Write serial data
+      // Send information to processing
+      Serial.print('H'); // unique header to identify start of message
+      Serial.print(",");
       for (uint8_t i = 0; i < 3; i++) {
+        Serial.print(licksRT[i]); Serial.print(",");
+        Serial.print(flag[i]); Serial.print(",");
+      }
+      Serial.println();
 
-        // if the trial is valid only tube lights should be ON
-        analogWrite(ledMotor[1], 0);
+      checkTrial(); // function check to set trial to true or false, also deals with plate timing
 
-        // CASE 1: If tube is not active stop light
-        // cue-delivery should also turn off if is not a valid trial
-        if (flagActive[i] == 0) {
-          analogWrite(ledMotor[i], 0); // turn cue-delivery light OFF
-          flagLED[i] = 0;
-        }
-        // if trial is valid, then turn light on
-        else if (flag[i] == 0  && flagActive[i] == 1 && validTrial == true) {
-          analogWrite(ledMotor[i], powerLED); // turn cue-delivery light ON
-          flagLED[i] = 1;
-        }
-        // CASE 3: Check if trigger has been delivered
-        if (licksCM[i] % licksActive[i] == 0 && licksCM[i] != 0 && flag[i] == 0 && flagActive[i] == 1) {  // This is to prevent bugs to trigger pause while already on a pause
-          timeStart[i] = millis();
+      if (validTrial == true) {
+        for (uint8_t i = 0; i < 3; i++) {
 
-          // Update flags
-          flag[i] = 1; // Indicates that a liquid delivery event has been triggered and this stops counting licks to the next delivery
-          flagMotor[i] = 1; // Flag to indicate that pump is ON
-          flagLED[i] = 0; // Flag to indicate that LED is OFF
-
-          // Deliver liquid through motor
-          MotorArray[i]->step(motorSteps[i], FORWARD, MICROSTEP); // motor ON
-          MotorArray[i]->release();
-
-          // only tube lights turn OFF
-          if (i != 1) {
-            analogWrite(ledMotor[i], 0); // cue-delivery light OFF
+          // CASE 1: If tube is not active stop light
+          // cue-delivery should also turn off if is not a valid trial
+          if (flagActive[i] == 0) {
+            analogWrite(ledMotor[i], 0); // turn cue-delivery light OFF
+            flagLED[i] = 0;
           }
-
-          // after liquid is delivered the trial ends
-          // only when experiment uses plate reset
-          if (plateUse == true) {
-            validTrial = false;
-          }
-
-          // reset counter of cumulative lick counter
-          licksCM[i] = 0;
-
-          // Actualizar el numero de licks en bomba PR
-          if (i == estacionPR) {
-            prEventos = prEventos + 1;
-            licksActive[i] = prSeq[prEventos];
-          }
-        } // close if
-
-        // CASE 4: Determine if motor needs to be turned off and LED ON
-        if (flag[i] == 1  && flagActive[i] == 1) {
-          timeEnd = millis();
-
-          // Check if LED has to be turned ON
-          if (plateUse == true) {
-            if (timeEnd - timeStart[i] >= timeLED_OFF[i] && flagLED[i] == 0) {
-              if (i != 1) {
-                analogWrite(ledMotor[i], powerLED); // turn cue-delivery light ON
-              }
-              flagLED[i] = 1;
-            }
-          }
-          else {
-            if (flagLED[i] == 0 && validTrial == true) {
+          // if trial is valid, then turn light on
+          else if (flag[i] == 0  && flagActive[i] == 1 && validTrial == true) {
+            // this is only for tubes
+            if (i != 1) {
               analogWrite(ledMotor[i], powerLED); // turn cue-delivery light ON
               flagLED[i] = 1;
             }
           }
+          // CASE 3: Check if trigger has been delivered
+          if (licksCM[i] % licksActive[i] == 0 && licksCM[i] != 0 && flag[i] == 0 && blockPlate[i] == 1) {  // This is to prevent bugs to trigger pause while already on a pause
+            timeStart[i] = millis();
 
-          // Check if time out is over
-          if (plateUse == true) {
+            // Update flags
+            flag[i] = 1; // Indicates that a liquid delivery event has been triggered and this stops counting licks to the next delivery
+            flagMotor[i] = 1; // Flag to indicate that pump is ON
+            flagLED[i] = 0; // Flag to indicate that LED is OFF
+
+            // Deliver liquid through motor
+            MotorArray[i]->step(motorSteps[i], FORWARD, MICROSTEP); // motor ON
+            MotorArray[i]->release();
+
+            // only tube lights turn OFF
+            if (i != 1) {
+              analogWrite(ledMotor[i], 0); // cue-delivery light OFF
+            }
+
+            // after liquid is delivered the trial ends
+            // only when experiment uses plate reset
+            if (plateUse == true) {
+              validTrial = false;
+            }
+
+            // reset counter of cumulative lick counter
+            licksCM[i] = 0;
+
+            // Actualizar el numero de licks en bomba PR
+            if (i == estacionPR) {
+              prEventos = prEventos + 1;
+              licksActive[i] = prSeq[prEventos];
+            }
+          } // close if
+
+          // CASE 4: Determine if motor needs to be turned off and LED ON
+          if (flag[i] == 1  && blockPlate[i] == 1) {
+            timeEnd = millis();
+            // Check if LED has to be turned ON
+            if (timeEnd - timeStart[i] >= timeLED_OFF[i] && flagLED[i] == 0) {
+              analogWrite(ledMotor[i], powerLED); // turn cue-delivery light ON
+              flagLED[i] = 1;
+            }
+            // Check if time out is over
             if (timeEnd - timeStart[i] >= timeOut[i] || validTrial == true) {
               flag[i] = 0;
             }
-          }
-          else {
-            if (timeEnd - timeStart[i] >= timeOut[i] || validTrial == true) {
-              flag[i] = 0;
-            }
 
-          }
-
-        } // close if on case 3
-      } // close if on case 1
-    } // close loop
-  } // close if on flagStart
-} // close void_loop
+          } // close if on case 3
+        } // close if on case 1
+      } // close loop
+    } // close if on flagStart
+  } // close void_loop

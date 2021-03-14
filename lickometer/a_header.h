@@ -109,6 +109,7 @@ int flagActive[3] = {0,0,0}; // This indicates which drinking tube is active - 0
 // Basic logic is that when the animal starts licking one tube the other one should
 // be inactivated, and to reset the animal must stand on a palte for a given
 // amount of time.
+int blockPlate[3] = {0,0,0};
 bool plateChange = false; // if plate changed state (touched / not touched)
 bool plateUse = false; // experiment with or without reset
 bool validTrial = true; // true: tubes set on; false: tubes set off
