@@ -85,10 +85,10 @@ void loop() {
       }
       currentPlateState = cap.touched() & (1 << 1); // get state of pin 1
       checkPlateChange();
-      if (plateChange == true) {
+      if (plateChange == true && validTrial == false) {
         plateTimer();
       }
-      if (totalPlateTime >= timeForReset) {
+      if (totalPlateTime >= timeForReset && validTrial == false) {
         validTrial = true; // trial now valid
         totalPlateTime = 0; // counter is reseted
       }
@@ -130,7 +130,7 @@ void loop() {
           MotorArray[i]->release();
 
           // only tube lights turn OFF
-          if (i == 0 || i == 2) {
+          if (i != 1) {
             analogWrite(ledMotor[i], 0); // cue-delivery light OFF
           }
 
@@ -153,10 +153,13 @@ void loop() {
         // CASE 4: Determine if motor needs to be turned off and LED ON
         if (flag[i] == 1  && flagActive[i] == 1) {
           timeEnd = millis();
+
           // Check if LED has to be turned ON
           if (plateUse == true) {
             if (timeEnd - timeStart[i] >= timeLED_OFF[i] && flagLED[i] == 0) {
-              analogWrite(ledMotor[i], powerLED); // turn cue-delivery light ON
+              if (i != 1) {
+                analogWrite(ledMotor[i], powerLED); // turn cue-delivery light ON
+              }
               flagLED[i] = 1;
             }
           }

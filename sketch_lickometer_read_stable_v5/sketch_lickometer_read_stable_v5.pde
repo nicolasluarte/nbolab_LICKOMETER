@@ -131,8 +131,8 @@ int[] yRefConfigMenu = {10,10,270,270};
 boolean[] overButtonFlag = {false, false, false, false};
 
 // Create interactive variables
-Checkbox[] portBox = new Checkbox[50]; // This implies that up to 10 ports can be drawn
-Button[] buttonTest = new Button[50];
+Checkbox[] portBox = new Checkbox[10]; // This implies that up to 10 ports can be drawn
+Button[] buttonTest = new Button[10];
 Button[][] buttonTimeAssign = new Button[4][3];
 
 Checkbox[][] configActiveBox = new Checkbox[4][3]; // This implies that up to 10 ports can be drawn
@@ -361,7 +361,12 @@ void drawConfigPanel(int ardIndex, String Port, int xref, int yref) {
   // Draw checkboxes and buttons
   for (int i = 0; i < 3; i++) {
     int q = i + 1;
-    fill(0); textAlign(LEFT, BOTTOM); text("BEBEDERO " + q, xref + 10, yref + 150 + i * 30); // Titles of bebederos    
+    if (i == 1){
+      fill(0); textAlign(LEFT, BOTTOM); text("PLACA RESET", xref + 10, yref + 150 + i * 30); // Titles of bebederos
+    }
+    else{
+    fill(0); textAlign(LEFT, BOTTOM); text("BEBEDERO " + q, xref + 10, yref + 150 + i * 30); // Titles of bebederos
+    }
     configActiveBox[ardIndex][i].render(xref + 150, (yref - 20) + 150 + i * 30);
     buttonTimeAssign[ardIndex][i].render(xref + 180, (yref - 20) + 150 + i * 30, 20,20);
     
@@ -412,7 +417,12 @@ void drawInfoPanel(int ardIndex, String Port, int xref, int yref) {
   int[] ypos = {yref + yref2 + 25, yref + yref2 + 45, yref + yref2 + 65};
   for (int i = 0; i < 3; i++) {
     int q = i + 1;
-    fill(0);text("BEBEDERO " + q,xref+25,ypos[i]); // Titles of bebederos
+    if (i == 1){
+      fill(0); textAlign(LEFT, BOTTOM); text("PLACA RESET", xref + 10, yref + 150 + i * 30); // Titles of bebederos
+    }
+    else{
+      fill(0); textAlign(LEFT, BOTTOM); text("BEBEDERO " + q, xref + 10, yref + 150 + i * 30); // Titles of bebederos
+    }
     
     // Activate traffic light index for activity
     int s = 0; if (spoutActive[ardIndex][i]) { s = 1; }
