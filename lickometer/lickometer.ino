@@ -57,7 +57,6 @@ void setup() {
   plateUse = true;
 }
 
-}
 
 // VOID LOOP
 void loop() {
@@ -68,6 +67,7 @@ void loop() {
     for (uint8_t i = 0; i < 3; i++) {
       blockPlate[i] = flagActive[i];
     }
+  }
 
     if (flagStart == 1) {
       testTubeStatus(); // Update tube status
