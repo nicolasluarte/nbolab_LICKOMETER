@@ -1,2 +1,9 @@
 # nbolab_LICKOMETER
-lickometer repo
+
+## Fixed ratio
+
+## Progressive ratio
+
+## Random ratio
+
+## Others
