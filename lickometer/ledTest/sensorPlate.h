@@ -15,7 +15,6 @@ class sensorPlate: public Adafruit_MPR121{
     int _ledPin;
     int _ledStatus;
 		int _status; // either on or off
-    bool _valid;
 		int _startMs;
 		int _endMs;
     int _heldMs;

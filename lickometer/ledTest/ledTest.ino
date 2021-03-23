@@ -14,7 +14,6 @@ void setup() {
   //  LED1.begin();
   S1.begin();
   S1.trialLed.on();
-
 }
 
 void loop() {
@@ -22,6 +21,7 @@ void loop() {
   S1.sense();
   if (S1.held() == 1000) {
     Serial.println("held for 1 sec");
-    S1.trialLed.off();
+    delay(1);
   }
+  
 }
