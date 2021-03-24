@@ -10,6 +10,8 @@ class sensorPlate: public Adafruit_MPR121{
 		void sense();
 		bool status();
 		int held();
+    int statusSum();
+    int lastStatus();
 	private:
 		int _pin; // where is connected
     int _ledPin;
@@ -18,6 +20,8 @@ class sensorPlate: public Adafruit_MPR121{
 		int _startMs;
 		int _endMs;
     int _heldMs;
+    int _statusSum;
+    int _lastStatus;
 		Adafruit_MPR121 cap;
 };
 
@@ -26,6 +30,7 @@ sensorPlate::sensorPlate(int pin, int ledPin)
 {
 		_pin = pin;
     _ledPin = ledPin;
+    _statusSum = 0;
 		Adafruit_MPR121 cap;
     digitalPin trialLead(_ledPin);
 }
@@ -36,11 +41,15 @@ void sensorPlate::sense()
 		if (cap.touched() & (1 << _pin)){
 			_status = 1;
 			_startMs = millis();
+      if (_lastStatus != _status){
+        _statusSum++;
+      }
 		}
 		else{
 			_status = 0;
 			_endMs = millis();
 		}
+    _lastStatus = _status;
 }
 
 int sensorPlate::held()
@@ -64,4 +73,14 @@ void sensorPlate::begin()
 bool sensorPlate::status()
 {
 		return _status;
+}
+
+int sensorPlate::statusSum()
+{
+    return _statusSum;
+}
+
+int sensorPlate::lastStatus()
+{
+    return _lastStatus;
 }

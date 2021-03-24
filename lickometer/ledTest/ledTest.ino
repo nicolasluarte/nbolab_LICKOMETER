@@ -22,9 +22,5 @@ void loop() {
 
     S1.sense();
     L1.sense();
-    Serial.write(L1.status());
-    Serial.write(S1.status());
-
-
-
+    Serial.println(L1.lastStatus());
 }
