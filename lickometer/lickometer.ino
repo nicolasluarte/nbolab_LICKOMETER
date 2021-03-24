@@ -6,7 +6,6 @@
 
   # VARIABLES
   # Time out for drinking tube one is 20 seconds.
-
   Written by Claudio Perez-Leighton.
 **********************************************************/
 #include "a_header.h"

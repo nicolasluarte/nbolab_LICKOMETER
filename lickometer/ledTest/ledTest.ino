@@ -1,27 +1,30 @@
 #include "leds.h"
 #include "sensorPlate.h"
+#include "flagPass.h"
 #include <Wire.h>
 #include "Adafruit_MPR121.h" //  MPR121 breakout board library
 #include <Adafruit_MotorShield.h> // Library for Adafruit MotorShield v2
 //
-//digitalPin LED1(6);
+
 sensorPlate S1(0, 6);
+sensorPlate L1(1, 5);
+flagPass flag(true, true);
 
 
 void setup() {
   Serial.begin(9600);
   // put your setup code here, to run once:
-  //  LED1.begin();
   S1.begin();
-  S1.trialLed.on();
+  L1.begin();
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  S1.sense();
-  if (S1.held() == 1000) {
-    Serial.println("held for 1 sec");
-    delay(1);
-  }
-  
+
+    S1.sense();
+    L1.sense();
+    Serial.write(L1.status());
+    Serial.write(S1.status());
+
+
+
 }
