@@ -1,5 +1,10 @@
 #ifndef DIGITALPIN_H
 #define DIGITALPIN_H
+// Class to provide basic functionality to LEDS
+// 1. Turn led on
+// 2. Turn led off
+// 3. Blink led
+// 4. Know the status of the led (on or off)
 class digitalPin{
 	public:
 		digitalPin(int pin);

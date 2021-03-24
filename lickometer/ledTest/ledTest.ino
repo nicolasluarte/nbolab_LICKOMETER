@@ -1,13 +1,13 @@
 #include "leds.h"
-#include "sensorPlate.h"
-#include "flagPass.h"
+#include "sensors.h"
+#include "flags.h"
 #include <Wire.h>
 #include "Adafruit_MPR121.h" //  MPR121 breakout board library
 #include <Adafruit_MotorShield.h> // Library for Adafruit MotorShield v2
 //
 
-sensorPlate S1(0, 6);
-sensorPlate L1(1, 5);
+sensors S1(0, 6);
+sensors L1(1, 5);
 flagPass flag(true, true);
 
 
