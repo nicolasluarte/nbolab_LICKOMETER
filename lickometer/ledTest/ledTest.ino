@@ -8,7 +8,7 @@
 
 sensors S1(0, 6);
 sensors L1(1, 5);
-flagPass flag(true, true);
+flags flag(true, true, 5);
 
 
 void setup() {
@@ -22,5 +22,6 @@ void loop() {
 
     S1.sense();
     L1.sense();
-    Serial.println(L1.lastStatus());
+    flag.isEvent(S1.statusSum());
+    Serial.println(flag.totalEvents());
 }
