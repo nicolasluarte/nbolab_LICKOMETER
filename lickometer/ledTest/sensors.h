@@ -12,9 +12,13 @@ class sensors: public Adafruit_MPR121{
 		void begin(); // function to start the led and the sensors
 		void sense(); // sense if being touched
 		bool status(); // to get the current 'touched' status, unlike sense() this only read a variable
+    bool active(); // get if sensor should be active or not (active = valid trial)
 		int held(); // for how long it has been touched
     int statusSum(); // cumulative sum of 'touched'
+    int validStatusSum(); // cumulative sum of 'touched' only if sensor is active
     int lastStatus(); // to know the previous 'touched' status
+    void sensorOff(); // turn off (for counting valid licks)
+    void sensorOn(); // turn on (for counting valid licks)
 	private:
 		int _pin; // the pin where the sensor is connected
     int _ledPin; // same but for the LED
@@ -24,7 +28,9 @@ class sensors: public Adafruit_MPR121{
 		int _endMs; // same but for touch ended or no touch
     int _heldMs; // variable for storing how long sensor has been touched
     int _statusSum; // variable for storing the touch cumulative sum
+    int _validStatusSum; // only count when sensor is active
     int _lastStatus; // variable for storing the previous 'touched' status
+    bool _active; // true = count licks for paradigm; false = do not count licks for paradigm
 		Adafruit_MPR121 cap; // not sure if this should be here, to initialize the sensor
 };
 
@@ -49,6 +55,9 @@ void sensors::sense()
       // if sensor has changed status, that is +1 per touch
       if (_lastStatus != _status){
         _statusSum++;
+      }
+      else if (_lastStatus != _status && _active == true){
+        _validStatusSum++;
       }
 		}
 		else{
@@ -77,16 +86,40 @@ void sensors::begin()
     trialLed.begin();
 }
 
+void sensors::sensorOn()
+// turns on sensor
+{
+    _active = true;
+}
+
+void sensors::sensorOff()
+// turns off sensor
+{
+    _active = false;
+}
+
 bool sensors::status()
 // retrieves the status
 {
 		return _status;
 }
 
+bool sensors::active()
+// retrieves the status of the sensor active or inactive
+{
+    return _active;
+}
+
 int sensors::statusSum()
 // retrieves the cumulative sum
 {
     return _statusSum;
+}
+
+int sensors::validStatusSum()
+// retrieves the cumulative sum
+{
+    return _validStatusSum;
 }
 
 int sensors::lastStatus()

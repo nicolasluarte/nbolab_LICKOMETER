@@ -8,7 +8,7 @@
 
 sensors S1(0, 6);
 sensors L1(1, 5);
-flags flag(true, true, 5);
+flags flag(true, true, 50, "RR");
 
 
 void setup() {
@@ -19,9 +19,9 @@ void setup() {
 }
 
 void loop() {
-
+//
     S1.sense();
     L1.sense();
-    flag.isEvent(S1.statusSum());
-    Serial.println(flag.totalEvents());
+    flag.createRatio();
+    Serial.println(flag.ratio());
 }
