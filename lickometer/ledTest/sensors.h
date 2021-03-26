@@ -12,22 +12,27 @@ class sensors: public Adafruit_MPR121{
 		void begin(); // function to start the led and the sensors
 		void sense(); // sense if being touched
 		bool status(); // to get the current 'touched' status, unlike sense() this only read a variable
+    bool validStatus();
     bool active(); // get if sensor should be active or not (active = valid trial)
 		int held(); // for how long it has been touched
     int statusSum(); // cumulative sum of 'touched'
     int validStatusSum(); // cumulative sum of 'touched' only if sensor is active
+    int validStatusSumReset();
     int lastStatus(); // to know the previous 'touched' status
     void sensorOff(); // turn off (for counting valid licks)
     void sensorOn(); // turn on (for counting valid licks)
+    void resetSum();
 	private:
 		int _pin; // the pin where the sensor is connected
     int _ledPin; // same but for the LED
     int _ledStatus; // 0 = off; 1 = on
 		int _status; // either on or off
+    int _validStatus;
 		int _startMs; // in loop timestamp for touch detected
 		int _endMs; // same but for touch ended or no touch
     int _heldMs; // variable for storing how long sensor has been touched
     int _statusSum; // variable for storing the touch cumulative sum
+    int _validStatusSumReset;
     int _validStatusSum; // only count when sensor is active
     int _lastStatus; // variable for storing the previous 'touched' status
     bool _active; // true = count licks for paradigm; false = do not count licks for paradigm
@@ -41,6 +46,8 @@ sensors::sensors(int pin, int ledPin)
 		_pin = pin;
     _ledPin = ledPin;
     _statusSum = 0;
+    _validStatusSum = 0;
+    _validStatusSumReset = 0;
 		Adafruit_MPR121 cap;
     digitalPin trialLead(_ledPin);
 }
@@ -55,16 +62,23 @@ void sensors::sense()
       // if sensor has changed status, that is +1 per touch
       if (_lastStatus != _status){
         _statusSum++;
-      }
-      else if (_lastStatus != _status && _active == true){
-        _validStatusSum++;
+        if (_active){
+          _validStatusSum++;
+          _validStatusSumReset++;
+          _validStatus = 1;
+        }
       }
 		}
 		else{
 			_status = 0;
+      _validStatus = 0;
 			_endMs = millis();
 		}
     _lastStatus = _status;
+}
+
+void sensors::resetSum(){
+    _validStatusSumReset = 0;
 }
 
 int sensors::held()
@@ -104,6 +118,12 @@ bool sensors::status()
 		return _status;
 }
 
+bool sensors::validStatus()
+// retrieves the status
+{
+    return _validStatus;
+}
+
 bool sensors::active()
 // retrieves the status of the sensor active or inactive
 {
@@ -120,6 +140,11 @@ int sensors::validStatusSum()
 // retrieves the cumulative sum
 {
     return _validStatusSum;
+}
+
+int sensors::validStatusSumReset()
+{
+    return _validStatusSumReset;
 }
 
 int sensors::lastStatus()

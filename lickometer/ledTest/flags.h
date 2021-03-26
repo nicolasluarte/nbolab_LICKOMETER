@@ -11,7 +11,7 @@ class flags {
     int isEvent(int validLickSum);
     void event();
     int ratio();
-    void paradigm();
+    String paradigm();
     int totalEvents();
     int lastEvent();
     void validLicks();
@@ -23,6 +23,7 @@ class flags {
     int _event;
     int _ratio;
     int _totalEvents;
+    int _lastTotalEvents;
     int _lastEvent;
     int _validLicks;
     int _min;
@@ -78,7 +79,7 @@ int flags::ratio() {
   return _ratio;
 }
 
-void flags::paradigm() {
+String flags::paradigm() {
   return _paradigm;
 }
 
@@ -104,6 +105,7 @@ int flags::isEvent(int validLickSum) {
   }
   else {
     _event = 0;
+    _lastTotalEvents = _totalEvents;
   }
   _lastEvent = _event;
   return _event;
