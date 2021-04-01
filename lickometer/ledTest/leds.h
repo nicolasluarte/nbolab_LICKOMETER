@@ -12,8 +12,10 @@ class digitalPin{
 		void on();
 		void off();
 		void blink();
+    int ledPower();
 		bool status();
 	private:
+    int _ledPower;
 		int _pin;
 		int _status;
 };
@@ -21,6 +23,7 @@ class digitalPin{
 digitalPin::digitalPin(int pin)
 {
 		   _pin = pin;
+      _ledPower = 10;
 }
 
 void digitalPin::begin()
@@ -30,8 +33,12 @@ void digitalPin::begin()
 
 void digitalPin::on()
 {
-	digitalWrite(_pin, HIGH);
+	analogWrite(_pin, _ledPower);
 	_status = 1;
+}
+
+int digitalPin::ledPower(){
+  return _ledPower;
 }
 
 void digitalPin::off()

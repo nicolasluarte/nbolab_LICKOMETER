@@ -49,7 +49,7 @@ sensors::sensors(int pin, int ledPin)
     _validStatusSum = 0;
     _validStatusSumReset = 0;
 		Adafruit_MPR121 cap;
-    digitalPin trialLead(_ledPin);
+    digitalPin trialLed(_ledPin);
 }
 
 void sensors::sense()
