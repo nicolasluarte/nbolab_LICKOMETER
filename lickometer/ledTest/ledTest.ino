@@ -1,6 +1,7 @@
 #include "leds.h"
 #include "sensors.h"
 #include "flags.h"
+#include "serialFunctions.h"
 #include <Wire.h>
 #include "Adafruit_MPR121.h" //  MPR121 breakout board library
 #include <Adafruit_MotorShield.h> // Library for Adafruit MotorShield v2
@@ -13,6 +14,11 @@ int sensorLed[] = {3, 5, 6};
 sensors plate(sensorPin[0], sensorLed[0]);
 sensors spout0(sensorPin[1], sensorLed[1]);
 sensors spout1(sensorPin[2], sensorLed[2]);
+
+// sensor flags constructors
+flags plateFlag(false, false, 0, 'f');
+flags spout0Flag(false, false, 0, 'f');
+flags spout1Flag(false, false, 0, 'f');
 
 
 // set experiment type
@@ -28,20 +34,30 @@ Adafruit_StepperMotor *Motor2 = AFMS.getStepper(200, 2);
 // set timeout
 int timeout;
 
+// for serial coms
+int experiment;
+char schedule;
+int fr;
+int spout_0;
+int spout_1;
+int plate_0;
+int outReads[32];
+
 
 void setup() {
   // set serial communications
   Serial.begin(9600);
 
   // needed to keep leonardo/micro from starting too fast!
-  while(!Serial){
+  while (!Serial) {
     delay(10);
   }
-  
+
   // set sensors
   plate.begin();
   spout0.begin();
   spout1.begin();
+
 
   // set motors
   AFMS.begin();
@@ -53,36 +69,52 @@ void setup() {
 
 void loop() {
   //
-//  S1.sense();
-//  S1.sensorOn();
-//  L1.sense();
-//  Serial.print(S1.statusSum());
-//  Serial.print(" ");
-//  Serial.print(flag.totalEvents());
-//  Serial.print(" ");
-//  Serial.println(flag.ratio());
-//  if (flag.paradigm() == "RR") {
-//    if (flag.isEvent(S1.validStatusSumReset()) == 1) {
-//      S1.resetSum();
-//      flag.createRatio();
-//    }
-//  }
-//  else if (flag.paradigm() == "FR"){
-//    flag.isEvent(S1.validStatusSum());
-//  }
-  spout0.trialLed.blink();
-  
-  // set to run experiment or testing
-  
-  // set lick freq
-  
+  //  S1.sense();
+  //  S1.sensorOn();
+  //  L1.sense();
+  //  Serial.print(S1.statusSum());
+  //  Serial.print(" ");
+  //  Serial.print(flag.totalEvents());
+  //  Serial.print(" ");
+  //  Serial.println(flag.ratio());
+  //  if (flag.paradigm() == "RR") {
+  //    if (flag.isEvent(S1.validStatusSumReset()) == 1) {
+  //      S1.resetSum();
+  //      flag.createRatio();
+  //    }
+  //  }
+  //  else if (flag.paradigm() == "FR"){
+  //    flag.isEvent(S1.validStatusSum());
+  //  }
+
+  // read experimental setup
+  recvWithStartEndMarkers(); // read serial port store into setupArray
+  experiment = receivedChars[0] - '0';
+  schedule = receivedChars[1];
+  fr = receivedChars[2] - '0';
+  spout_0 = receivedChars[3] - '0';
+  spout_1 = receivedChars[4] - '0';
+  plate_0 = receivedChars[5] - '0';
+
+  // set sensor on or off
+  if (spout_0 == 1) spout0.sensorOn(); else spout0.sensorOff();
+  if (spout_1 == 1) spout1.sensorOn(); else spout1.sensorOff();
+  if (plate_0 == 1) plate.sensorOn(); else plate.sensorOff();
+
   // read sensors
-  
+  if (spout_0 == 1) spout0.sense(), spout0Flag.lickometerOn(); else spout0Flag.lickometerOff();
+  if (spout_1 == 1) spout1.sense(), spout1Flag.lickometerOn(); else spout0Flag.lickometerOff();
+  if (plate_0 == 1) plate.sense(), plateFlag.plateOn(); else plateFlag.plateOff();
+
+  // get sensor reads
+  if (spout0Flag.lickometerActive()) outReads[0] = spout0.status(); else outReads[0] = 3;
+
+  Serial.println(outReads[0]);
   // check for valid trials
-  
+
   // time out
 
   // write data
-  
-  
+
+
 }

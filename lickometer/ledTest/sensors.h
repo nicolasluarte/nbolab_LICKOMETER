@@ -11,7 +11,7 @@ class sensors: public Adafruit_MPR121{
     digitalPin trialLed; // every sensor has 1 assigned LED, could be used as cue or something else
 		void begin(); // function to start the led and the sensors
 		void sense(); // sense if being touched
-		bool status(); // to get the current 'touched' status, unlike sense() this only read a variable
+		bool status(); // to get the current 'touched' status, unlike sense() this only reads a variable
     bool validStatus();
     bool active(); // get if sensor should be active or not (active = valid trial)
 		int held(); // for how long it has been touched

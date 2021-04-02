@@ -1,7 +1,7 @@
 // Class to provide comunication between sensors and experiment logic
 class flags {
   public:
-    flags(bool plateActive, bool lickometerActive, int ratio, String paradigm);
+    flags(bool plateActive, bool lickometerActive, int ratio, char paradigm);
     bool plateActive(); // signals if the plate sensor should be active or not
     bool lickometerActive(); // same but for the lickometers
     void plateOn(); // turn on or off the plate
@@ -11,7 +11,7 @@ class flags {
     int isEvent(int validLickSum);
     void event();
     int ratio();
-    String paradigm();
+    char paradigm();
     int totalEvents();
     int lastEvent();
     void validLicks();
@@ -28,10 +28,10 @@ class flags {
     int _validLicks;
     int _min;
     int _max;
-    String _paradigm;
+    char _paradigm;
 };
 
-flags::flags(bool plateActive, bool lickometerActive, int ratio, String paradigm) {
+flags::flags(bool plateActive, bool lickometerActive, int ratio, char paradigm) {
   // constructor this allows for status specification at the start of the experiment
   _plateActive = plateActive;
   _lickometerActive = lickometerActive;
@@ -79,7 +79,7 @@ int flags::ratio() {
   return _ratio;
 }
 
-String flags::paradigm() {
+char flags::paradigm() {
   return _paradigm;
 }
 
