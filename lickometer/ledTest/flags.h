@@ -1,7 +1,7 @@
 // Class to provide comunication between sensors and experiment logic
 class flags {
   public:
-    flags(bool plateActive, bool lickometerActive, int ratio, char paradigm);
+    flags(bool plateActive, bool lickometerActive, int ratio, int paradigm);
     bool plateActive(); // signals if the plate sensor should be active or not
     bool lickometerActive(); // same but for the lickometers
     void plateOn(); // turn on or off the plate
@@ -11,7 +11,9 @@ class flags {
     int isEvent(int validLickSum);
     void event();
     int ratio();
-    char paradigm();
+    void setRatio(int r);
+    int paradigm();
+    void setParadigm(int p);
     int totalEvents();
     int lastEvent();
     void validLicks();
@@ -28,10 +30,10 @@ class flags {
     int _validLicks;
     int _min;
     int _max;
-    char _paradigm;
+    int _paradigm;
 };
 
-flags::flags(bool plateActive, bool lickometerActive, int ratio, char paradigm) {
+flags::flags(bool plateActive, bool lickometerActive, int ratio, int paradigm) {
   // constructor this allows for status specification at the start of the experiment
   _plateActive = plateActive;
   _lickometerActive = lickometerActive;
@@ -79,8 +81,16 @@ int flags::ratio() {
   return _ratio;
 }
 
-char flags::paradigm() {
+void flags::setRatio(int r) {
+  _ratio = r;
+}
+
+int flags::paradigm() {
   return _paradigm;
+}
+
+void flags::setParadigm(int p) {
+  _paradigm = p;
 }
 
 int flags::totalEvents() {
@@ -88,10 +98,11 @@ int flags::totalEvents() {
 }
 
 void flags::createRatio() {
-  if (_paradigm == "FR") {
+  if (_paradigm == 0) {
     _ratio == _ratio;
   }
-  else if (_paradigm == "RR") {
+    _min = (int) _ratio - (_ratio / 2);
+    _max = (int) _ratio + (_ratio / 2);
     _ratio = random(_min, _max); // random uniform, same mean as fixed ratio
   }
 }

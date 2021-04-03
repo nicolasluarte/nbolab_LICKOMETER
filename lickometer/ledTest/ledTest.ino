@@ -16,9 +16,9 @@ sensors spout0(sensorPin[1], sensorLed[1]);
 sensors spout1(sensorPin[2], sensorLed[2]);
 
 // sensor flags constructors
-flags plateFlag(false, false, 0, 'f');
-flags spout0Flag(false, false, 0, 'f');
-flags spout1Flag(false, false, 0, 'f');
+flags plateFlag(false, false, 5, 1);
+flags spout0Flag(false, false, 5, 1);
+flags spout1Flag(false, false, 5, 1);
 
 
 // set experiment type
@@ -36,11 +36,13 @@ int timeout;
 
 // for serial coms
 int experiment;
-char schedule;
 int fr;
 int spout_0;
 int spout_1;
 int plate_0;
+int scheduleSpout_0;
+int scheduleSpout_1;
+int timePlate_0;
 int outReads[32];
 
 
@@ -90,16 +92,33 @@ void loop() {
   // read experimental setup
   recvWithStartEndMarkers(); // read serial port store into setupArray
   experiment = receivedChars[0] - '0';
-  schedule = receivedChars[1];
-  fr = receivedChars[2] - '0';
-  spout_0 = receivedChars[3] - '0';
-  spout_1 = receivedChars[4] - '0';
-  plate_0 = receivedChars[5] - '0';
+  fr = receivedChars[1] - '0';
+  spout_0 = receivedChars[2] - '0';
+  spout_1 = receivedChars[3] - '0';
+  plate_0 = receivedChars[4] - '0';
+  scheduleSpout_0 = receivedChars[5] - '0';
+  scheduleSpout_1 = receivedChars[6] - '0';
+  timePlate_0 = receivedChars[7] - '0';
 
   // set sensor on or off
   if (spout_0 == 1) spout0.sensorOn(); else spout0.sensorOff();
   if (spout_1 == 1) spout1.sensorOn(); else spout1.sensorOff();
   if (plate_0 == 1) plate.sensorOn(); else plate.sensorOff();
+
+  // create ratios, TODO: PR
+  // spout 0
+  spout0Flag.setRatio(fr);
+  spout0Flag.setParadigm(scheduleSpout_0);
+  spout0Flag.createRatio();
+
+  // spout 1
+  spout1Flag.setRatio(fr);
+  spout1Flag.setParadigm(scheduleSpout_1);
+  spout1Flag.createRatio();
+
+  // plate
+  // TODO: sensor or flag should know if enough time has been spent on the plate
+
 
   // read sensors
   if (spout_0 == 1) spout0.sense(), spout0Flag.lickometerOn(); else spout0Flag.lickometerOff();
@@ -107,12 +126,15 @@ void loop() {
   if (plate_0 == 1) plate.sense(), plateFlag.plateOn(); else plateFlag.plateOff();
 
   // get sensor reads
-  if (spout0Flag.lickometerActive()) outReads[0] = spout0.status(); else outReads[0] = 3;
-
-  Serial.println(outReads[0]);
+  if (spout0Flag.lickometerActive()) outReads[0] = spout0.status(); else outReads[0] = 3; // 3 means not a valid lecture because its off
+  if (spout1Flag.lickometerActive()) outReads[1] = spout1.status(); else outReads[1] = 3;
+  if (plateFlag.lickometerActive()) outReads[2] = plate.status(); else outReads[2] = 3;
+  
   // check for valid trials
+  Serial.println(spout0Flag.ratio());
 
   // time out
+
 
   // write data
 
