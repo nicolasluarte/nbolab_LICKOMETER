@@ -116,14 +116,13 @@ void loop() {
   spout1Flag.setParadigm(scheduleSpout_1);
   spout1Flag.createRatio();
 
-  // plate
-  // TODO: sensor or flag should know if enough time has been spent on the plate
-
-
   // read sensors
   if (spout_0 == 1) spout0.sense(), spout0Flag.lickometerOn(); else spout0Flag.lickometerOff();
   if (spout_1 == 1) spout1.sense(), spout1Flag.lickometerOn(); else spout0Flag.lickometerOff();
   if (plate_0 == 1) plate.sense(), plateFlag.plateOn(); else plateFlag.plateOff();
+  // read if animal has spent enough time on top of the plate, set this time to 0
+  // if plate is not going to be used
+  if (plate.held() >= timePlate_0) plateFlag.setHeldValid(true); else plateFlag.setHeldValid(false);
 
   // get sensor reads
   if (spout0Flag.lickometerActive()) outReads[0] = spout0.status(); else outReads[0] = 3; // 3 means not a valid lecture because its off
@@ -131,10 +130,8 @@ void loop() {
   if (plateFlag.lickometerActive()) outReads[2] = plate.status(); else outReads[2] = 3;
   
   // check for valid trials
-  Serial.println(spout0Flag.ratio());
 
   // time out
-
 
   // write data
 

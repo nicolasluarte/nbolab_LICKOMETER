@@ -18,6 +18,9 @@ class flags {
     int lastEvent();
     void validLicks();
     void createRatio(); // this functions create the ratio for the trial, given the paradigm string
+    void setHeldValid(bool v);
+    bool heldValid();
+
 
   private:
     bool _plateActive;
@@ -27,6 +30,7 @@ class flags {
     int _totalEvents;
     int _lastTotalEvents;
     int _lastEvent;
+    bool _heldValid;
     int _validLicks;
     int _min;
     int _max;
@@ -47,6 +51,14 @@ flags::flags(bool plateActive, bool lickometerActive, int ratio, int paradigm) {
 
 bool flags::plateActive() {
   return _plateActive;
+}
+
+void flags::setHeldValid(bool v) {
+	_heldValid = v;
+}
+
+bool flags::heldValid(){
+	return _heldValid;
 }
 
 bool flags::lickometerActive() {
