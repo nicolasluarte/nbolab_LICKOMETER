@@ -52,8 +52,8 @@ class sensors: public Adafruit_MPR121 {
     int _lastStatus; // variable for storing the previous 'touched' status
     bool _active; // true = count licks for paradigm; false = do not count licks for paradigm
     Adafruit_MPR121 cap; // not sure if this should be here, to initialize the sensor
-//    Adafruit_MotorShield AFMS = Adafruit_MotorShield();
-//    Adafruit_StepperMotor *Motor = AFMS.getStepper(200, _motorPort);
+    Adafruit_MotorShield AFMS = Adafruit_MotorShield();
+    Adafruit_StepperMotor *Motor;
 };
 
 sensors::sensors(int pin, int ledPin, int motorPort)
@@ -68,9 +68,7 @@ sensors::sensors(int pin, int ledPin, int motorPort)
   _validStatusSumReset = 0;
   Adafruit_MPR121 cap;
   digitalPin trialLed(_ledPin);
-//  double powerMotor = 0.6; // seemingly not used
-//  Adafruit_MotorShield AFMS = Adafruit_MotorShield();
-//  Adafruit_StepperMotor *Motor = AFMS.getStepper(200, _motorPort);
+  Motor = AFMS.getStepper(200, _motorPort);
 }
 
 void sensors::sense()
@@ -98,10 +96,10 @@ void sensors::sense()
   _lastStatus = _status;
 }
 
-//void sensors::deliverLiquid(){
-//  Motor->step(12, FORWARD, MICROSTEP);
-//  Motor->release();
-//}
+void sensors::deliverLiquid(){
+  Motor->step(12, FORWARD, MICROSTEP);
+  Motor->release();
+}
 
 void sensors::resetSum() {
   _validStatusSumReset = 0;
@@ -124,6 +122,7 @@ void sensors::begin()
 {
   cap.begin(0x5A);
   trialLed.begin();
+  AFMS.begin();
 }
 
 void sensors::sensorOn()

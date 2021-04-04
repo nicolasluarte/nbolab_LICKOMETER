@@ -68,7 +68,7 @@ bool flags::timeOut(int timeOutMs) {
       return false;
     }
   }
-  else{
+  else if (_totalEvents= 0){
     return true;
   }
 }

@@ -6,6 +6,7 @@
 #include "Adafruit_MPR121.h" //  MPR121 breakout board library
 #include <Adafruit_MotorShield.h> // Library for Adafruit MotorShield v2
 
+
 // variables to control sensor pin and led associated with sensor
 int sensorPin[] = {0, 1, 2};
 int sensorLed[] = {3, 5, 6};
@@ -33,10 +34,7 @@ int timePlate_0;
 int timeOut;
 int newSetup;
 int outReads[32];
-int banana = 0;
 
-  Adafruit_MotorShield AFMS = Adafruit_MotorShield();
-  Adafruit_StepperMotor *myMotor = AFMS.getStepper(200, 1);
 
 void setup() {
   // set serial communications
@@ -50,7 +48,7 @@ void setup() {
   // set sensors
   plate.begin();
   spout0.begin();
-  spout1.begin();
+//  spout1.begin();
   plateFlag.setHeldValid(false); // at the start the held time should not be valid
 
 }
@@ -75,11 +73,7 @@ void loop() {
   //    flag.isEvent(S1.validStatusSum());
   //  }
   // <1511111111>
-  
-//  spout0.deliverLiquid();
-//  spout1.deliverLiquid();
-  myMotor->step(12, FORWARD, MICROSTEP);
-  myMotor->release();
+
 
   // read experimental setup
   recvWithStartEndMarkers(); // read serial port store into setupAr ||||ray
@@ -145,9 +139,14 @@ void loop() {
       }
     }
   }
-  else{
+  else {
     spout0.trialLed.off();
   }
+
+//  if (spout0Flag.timeOut(timeOut) && spout0Flag.eventChanged()){
+//    spout0.deliverLiquid();
+//    spout0Flag.setEventChanged();
+//  }
 
   // spout 1 control
   if (spout1Flag.timeOut(timeOut)) {
@@ -162,7 +161,7 @@ void loop() {
       }
     }
   }
-  else{
+  else {
     spout1.trialLed.off();
   }
 
