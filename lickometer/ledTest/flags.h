@@ -16,10 +16,13 @@ class flags {
     void setParadigm(int p);
     int totalEvents();
     int lastEvent();
-    void validLicks();
     void createRatio(); // this functions create the ratio for the trial, given the paradigm string
     void setHeldValid(bool v);
     bool heldValid();
+    bool eventChanged();
+    void setEventChanged();
+    int eventMs();
+    bool timeOut(int timeOutMs);
 
 
   private:
@@ -27,21 +30,24 @@ class flags {
     bool _lickometerActive;
     int _event;
     int _ratio;
+    int _RATIO;
     int _totalEvents;
     int _lastTotalEvents;
     int _lastEvent;
+    bool _eventChanged;
     bool _heldValid;
     int _validLicks;
     int _min;
     int _max;
     int _paradigm;
+    int _eventMs;
 };
 
 flags::flags(bool plateActive, bool lickometerActive, int ratio, int paradigm) {
   // constructor this allows for status specification at the start of the experiment
   _plateActive = plateActive;
   _lickometerActive = lickometerActive;
-  _ratio = ratio;
+  _RATIO = ratio;
   _totalEvents = 0;
   _paradigm = paradigm;
   randomSeed(analogRead(0));
@@ -53,12 +59,38 @@ bool flags::plateActive() {
   return _plateActive;
 }
 
-void flags::setHeldValid(bool v) {
-	_heldValid = v;
+bool flags::timeOut(int timeOutMs) {
+  if (_totalEvents != 0) {
+    if ((millis() - _eventMs) > timeOutMs){
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
+  else{
+    return true;
+  }
 }
 
-bool flags::heldValid(){
-	return _heldValid;
+int flags::eventMs() {
+  return _eventMs;
+}
+
+bool flags::eventChanged() {
+  return _eventChanged;
+}
+
+void flags::setEventChanged() {
+  _eventChanged = false;
+}
+
+void flags::setHeldValid(bool v) {
+  _heldValid = v;
+}
+
+bool flags::heldValid() {
+  return _heldValid;
 }
 
 bool flags::lickometerActive() {
@@ -85,10 +117,6 @@ void flags::event() {
   return _event;
 }
 
-void flags::validLicks() {
-  return _validLicks;
-}
-
 int flags::ratio() {
   return _ratio;
 }
@@ -111,10 +139,11 @@ int flags::totalEvents() {
 
 void flags::createRatio() {
   if (_paradigm == 0) {
-    _ratio == _ratio;
+    _ratio == _RATIO;
   }
-    _min = (int) _ratio - (_ratio / 2);
-    _max = (int) _ratio + (_ratio / 2);
+  if (_paradigm == 1) {
+    _min = (int) _RATIO - (_RATIO / 2);
+    _max = (int) _RATIO + (_RATIO / 2);
     _ratio = random(_min, _max); // random uniform, same mean as fixed ratio
   }
 }
@@ -124,6 +153,8 @@ int flags::isEvent(int validLickSum) {
     _event = 1;
     if (_lastEvent != _event) {
       _totalEvents++;
+      _eventChanged = true;
+      _eventMs = millis();
     }
   }
   else {
