@@ -21,7 +21,7 @@ class flags {
     bool heldValid();
     bool eventChanged();
     void setEventChanged();
-    int eventMs();
+    unsigned long eventMs();
     bool timeOut(int timeOutMs);
 
 
@@ -40,7 +40,7 @@ class flags {
     int _min;
     int _max;
     int _paradigm;
-    int _eventMs;
+    unsigned long _eventMs;
 };
 
 flags::flags(bool plateActive, bool lickometerActive, int ratio, int paradigm) {
@@ -68,12 +68,12 @@ bool flags::timeOut(int timeOutMs) {
       return false;
     }
   }
-  else if (_totalEvents= 0){
+  else if (_totalEvents == 0){
     return true;
   }
 }
 
-int flags::eventMs() {
+unsigned long flags::eventMs() {
   return _eventMs;
 }
 
@@ -149,7 +149,7 @@ void flags::createRatio() {
 }
 
 int flags::isEvent(int validLickSum) {
-  if (validLickSum % _ratio == 0 && validLickSum != 0) {
+  if (validLickSum % _ratio == 0 && validLickSum != 0 && _lickometerActive == true) {
     _event = 1;
     if (_lastEvent != _event) {
       _totalEvents++;

@@ -48,8 +48,9 @@ void setup() {
   // set sensors
   plate.begin();
   spout0.begin();
+  spout1.begin();
 //  spout1.begin();
-  plateFlag.setHeldValid(false); // at the start the held time should not be valid
+  plateFlag.setHeldValid(true); // so trial can begin without stepping on plate
 
 }
 
@@ -114,12 +115,12 @@ void loop() {
   }
 
   // read sensors
-  if (spout_0 == 1) spout0.sense(), spout0Flag.lickometerOn(); else spout0Flag.lickometerOff();
-  if (spout_1 == 1) spout1.sense(), spout1Flag.lickometerOn(); else spout0Flag.lickometerOff();
-  if (plate_0 == 1) plate.sense(), plateFlag.plateOn(); else plateFlag.plateOff();
+  if (spout_0 == 1) spout0.sensorOn(), spout0.sense();  else spout0.sensorOff();
+  if (spout_1 == 1) spout1.sensorOn(), spout1.sense(); else spout1.sensorOff();
+  if (plate_0 == 1) plate.sensorOn(), plate.sense(); else plate.sensorOff();
   // read if animal has spent enough time on top of the plate, set this time to 0
   // if plate is not going to be used
-  if (plate.held() > timePlate_0) plateFlag.setHeldValid(true); else plateFlag.setHeldValid(false);
+//  if (plate.held() > timePlate_0) plateFlag.setHeldValid(true); else plateFlag.setHeldValid(false);
 
   // get sensor reads
   if (spout0Flag.lickometerActive()) outReads[0] = spout0.status(); else outReads[0] = 3; // 3 means not a valid lecture because its off
@@ -127,46 +128,47 @@ void loop() {
   if (plateFlag.lickometerActive()) outReads[2] = plate.status(); else outReads[2] = 3;
 
   // spout 0 control
-  if (spout0Flag.timeOut(timeOut)) {
+  if (spout0Flag.timeOut(timeOut) && plateFlag.heldValid()) {
     spout0.trialLed.on();
-    if (spout0Flag.paradigm() == 0) { // 0 = fixed ratio
-      spout0Flag.isEvent(spout0.validStatusSum());
-    }
-    else if (spout0Flag.paradigm() == 1) { // 1 = random ratio
-      if (spout0Flag.isEvent(spout0.validStatusSumReset()) == 1) {
-        spout0.resetSum();
-        spout0Flag.createRatio();
-      }
+    spout0Flag.lickometerOn();
+    if (spout0Flag.isEvent(spout0.validStatusSumReset()) == 1){
+    	spout0.resetSum();
+    	spout0.trialLed.off(); // this is here because motor code blocks the code
+	plateFlag.setHeldValid(false);
+	spout0Flag.createRatio();
+	spout0.deliverLiquid();
     }
   }
   else {
     spout0.trialLed.off();
+    spout0Flag.lickometerOff();
+    spout0.resetSum();
+    if(plate.held() > timePlate_0 || timePlate_0 ==0) plateFlag.setHeldValid(true);
   }
 
-//  if (spout0Flag.timeOut(timeOut) && spout0Flag.eventChanged()){
-//    spout0.deliverLiquid();
-//    spout0Flag.setEventChanged();
-//  }
-
   // spout 1 control
-  if (spout1Flag.timeOut(timeOut)) {
+  if (spout1Flag.timeOut(timeOut) && plateFlag.heldValid()) {
     spout1.trialLed.on();
-    if (spout1Flag.paradigm() == 0) { // 0 = fixed ratio
-      spout0Flag.isEvent(spout1.validStatusSum());
-    }
-    else if (spout1Flag.paradigm() == 1) { // 1 = random ratio
-      if (spout0Flag.isEvent(spout1.validStatusSumReset()) == 1) {
-        spout1.resetSum();
-        spout1Flag.createRatio();
-      }
+    spout1Flag.lickometerOn();
+    if (spout1Flag.isEvent(spout1.validStatusSumReset()) == 1){
+    	spout1.resetSum();
+    	spout1.trialLed.off(); // this is here because motor code blocks the code
+	plateFlag.setHeldValid(false);
+	spout1Flag.createRatio();
+	spout1.deliverLiquid();
     }
   }
   else {
     spout1.trialLed.off();
+    spout1Flag.lickometerOff();
+    spout1.resetSum();
+    if(plate.held() > timePlate_0 || timePlate_0 == 0) plateFlag.setHeldValid(true);
   }
 
+
+
   // check for valid trials
-  Serial.println((String) "ratio: " + spout0Flag.ratio() + "Events: " + spout0Flag.totalEvents() + "time out is: " + timeOut);
+  Serial.println((String) "ratio: " + spout0Flag.ratio() + " Events: " + spout0Flag.totalEvents());
 
   // time out
 
