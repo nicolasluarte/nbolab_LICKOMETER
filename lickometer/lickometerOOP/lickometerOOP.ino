@@ -33,7 +33,7 @@ int scheduleSpout_1;
 int timePlate_0;
 int timeOut;
 int newSetup;
-int outReads[32];
+unsigned long outReads[32];
 
 
 void setup() {
@@ -167,12 +167,45 @@ void loop() {
 
 
 
-  // check for valid trials
-  Serial.println((String) "ratio: " + spout0Flag.ratio() + " Events: " + spout0Flag.totalEvents());
-
-  // time out
-
   // write data
+  outReads[3] = spout0Flag.totalEvents();
+  outReads[4] = spout1Flag.totalEvents();
+  outReads[5] = spout0.statusSum();
+  outReads[6] = spout1.statusSum();
+  outReads[7] = plateFlag.heldValid();
+  outReads[8] = spout0Flag.ratio();
+  outReads[9] = spout1Flag.ratio();
+  outReads[10] = fr;
+  outReads[11] = spout_0;
+  outReads[12] = spout_1;
+  outReads[13] = plate_0;
+  outReads[14] = scheduleSpout_0;
+  outReads[15] = scheduleSpout_1;
+  outReads[16] = timePlate_0;
+  outReads[17] = timeOut;
+  outReads[18] = experiment;
+  outReads[18] = millis();
+
+  Serial.println((String) outReads[0] + "," +
+  outReads[1] + "," +
+  outReads[2] + "," +
+  outReads[3] + "," +
+  outReads[4] + "," +
+  outReads[5] + "," +
+  outReads[6] + "," +
+  outReads[7] + "," +
+  outReads[8] + "," +
+  outReads[9] + "," +
+  outReads[10] + "," +
+  outReads[11] + "," +
+  outReads[12] + "," +
+  outReads[13] + "," +
+  outReads[14] + "," +
+  outReads[15] + "," +
+  outReads[16] + "," +
+  outReads[17] + "," +
+  outReads[18]
+  );
 
 
 }
