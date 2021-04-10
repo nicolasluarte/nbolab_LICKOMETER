@@ -33,10 +33,7 @@ int scheduleSpout_1;
 int timePlate_0;
 int timeOut;
 int newSetup;
-int goBlink;
-int blinkSensor;
-int testMotors;
-unsigned long outReads[32];
+int outReads[32];
 
 
 void setup() {
@@ -51,9 +48,8 @@ void setup() {
   // set sensors
   plate.begin();
   spout0.begin();
-  spout1.begin();
-  //  spout1.begin();
-  plateFlag.setHeldValid(true); // so trial can begin without stepping on plate
+//  spout1.begin();
+  plateFlag.setHeldValid(false); // at the start the held time should not be valid
 
 }
 
@@ -80,7 +76,7 @@ void loop() {
 
 
   // read experimental setup
-  recvWithStartEndMarkers(); // read serial port store into setup array
+  recvWithStartEndMarkers(); // read serial port store into setupAr ||||ray
   experiment = receivedChars[0] - '0';
   fr = receivedChars[1] - '0';
   spout_0 = receivedChars[2] - '0';
@@ -91,40 +87,6 @@ void loop() {
   timePlate_0 = ((int) receivedChars[7] - '0') * 1000; // time specifies number of seconds
   timeOut = ((int) receivedChars[8] - '0') * 1000;
   newSetup = receivedChars[9] - '0';
-  goBlink = receivedChars[10] - '0';
-  blinkSensor = receivedChars[11] - '0';
-  testMotors = receivedChars[12] - '0';
-
-  // test stuff goes here
-  if (goBlink == 1) {
-    for (int i = 0; i < 5; i++) {
-      spout0.trialLed.off();
-      spout1.trialLed.off();
-      plate.trialLed.off();
-      delay(100);
-      spout0.trialLed.on();
-      spout1.trialLed.on();
-      plate.trialLed.on();
-      delay(100);
-    }
-  }
-
-  if (testMotors == 1){
-    spout0.deliverLiquid();
-    spout1.deliverLiquid();
-  }
-
-  switch (blinkSensor) {
-    case (1):
-      spout0.trialLed.blink();
-      break;
-    case (2):
-      spout1.trialLed.blink();
-      break;
-    case (3):
-      plate.trialLed.blink();
-      break;
-  }
 
   // set sensor on or off PROBABLY NOT USEFUL
   if (spout_0 == 1) spout0.sensorOn(); else spout0.sensorOff();
@@ -153,11 +115,11 @@ void loop() {
 
   // read sensors
   if (spout_0 == 1) spout0.sensorOn(), spout0.sense();  else spout0.sensorOff();
-  if (spout_1 == 1) spout1.sensorOn(), spout1.sense(); else spout1.sensorOff();
+  if (spout_1 == 1) spout1.sensorOn(), spout1.sense(); else spout0.sensorOff();
   if (plate_0 == 1) plate.sensorOn(), plate.sense(); else plate.sensorOff();
   // read if animal has spent enough time on top of the plate, set this time to 0
   // if plate is not going to be used
-  //  if (plate.held() > timePlate_0) plateFlag.setHeldValid(true); else plateFlag.setHeldValid(false);
+  if (plate.held() > timePlate_0) plateFlag.setHeldValid(true); else plateFlag.setHeldValid(false);
 
   // get sensor reads
   if (spout0Flag.lickometerActive()) outReads[0] = spout0.status(); else outReads[0] = 3; // 3 means not a valid lecture because its off
@@ -165,89 +127,50 @@ void loop() {
   if (plateFlag.lickometerActive()) outReads[2] = plate.status(); else outReads[2] = 3;
 
   // spout 0 control
-  if (spout0Flag.timeOut(timeOut) && plateFlag.heldValid()) {
-    if (timePlate_0 != 1) plate.trialLed.off();
+  if (spout0Flag.timeOut(timeOut)) {
     spout0.trialLed.on();
     spout0Flag.lickometerOn();
-    if (spout0Flag.isEvent(spout0.validStatusSumReset()) == 1) {
-      spout0.resetSum();
-      spout0.trialLed.off(); // this is here because motor code blocks the code
-      plateFlag.setHeldValid(false);
-      spout0Flag.createRatio();
-      spout0.deliverLiquid();
+    if (spout0Flag.isEvent(spout0.validStatusSumReset()) == 1){
+    	spout0.resetSum();
+    	spout0.trialLed.off(); // this is here because motor code blocks the code
+	spout0Flag.createRatio();
+	spout0.deliverLiquid();
     }
   }
   else {
     spout0.trialLed.off();
     spout0Flag.lickometerOff();
     spout0.resetSum();
-    if (plate.held() > timePlate_0 || timePlate_0 == 0) plateFlag.setHeldValid(true);
-    if (timePlate_0 != 1) plate.trialLed.on();
   }
 
+//  if (spout0Flag.timeOut(timeOut) && spout0Flag.eventChanged()){
+//    spout0.deliverLiquid();
+//    spout0Flag.setEventChanged();
+//  }
+
   // spout 1 control
-  if (spout1Flag.timeOut(timeOut) && plateFlag.heldValid()) {
-    if (timePlate_0 != 1) plate.trialLed.off();
+  if (spout1Flag.timeOut(timeOut)) {
     spout1.trialLed.on();
-    spout1Flag.lickometerOn();
-    if (spout1Flag.isEvent(spout1.validStatusSumReset()) == 1) {
-      spout1.resetSum();
-      spout1.trialLed.off(); // this is here because motor code blocks the code
-      plateFlag.setHeldValid(false);
-      spout1Flag.createRatio();
-      spout1.deliverLiquid();
+    if (spout1Flag.paradigm() == 0) { // 0 = fixed ratio
+      spout0Flag.isEvent(spout1.validStatusSum());
+    }
+    else if (spout1Flag.paradigm() == 1) { // 1 = random ratio
+      if (spout0Flag.isEvent(spout1.validStatusSumReset()) == 1) {
+        spout1.resetSum();
+        spout1Flag.createRatio();
+      }
     }
   }
   else {
     spout1.trialLed.off();
-    spout1Flag.lickometerOff();
-    spout1.resetSum();
-    if (plate.held() > timePlate_0 || timePlate_0 == 0) plateFlag.setHeldValid(true);
-    if (timePlate_0 != 1) plate.trialLed.on();
   }
 
+  // check for valid trials
+  Serial.println((String) "ratio: " + spout0Flag.ratio() + " Events: " + spout0Flag.totalEvents());
 
+  // time out
 
   // write data
-  outReads[3] = spout0Flag.totalEvents();
-  outReads[4] = spout1Flag.totalEvents();
-  outReads[5] = spout0.statusSum();
-  outReads[6] = spout1.statusSum();
-  outReads[7] = plateFlag.heldValid();
-  outReads[8] = spout0Flag.ratio();
-  outReads[9] = spout1Flag.ratio();
-  outReads[10] = fr;
-  outReads[11] = spout_0;
-  outReads[12] = spout_1;
-  outReads[13] = plate_0;
-  outReads[14] = scheduleSpout_0;
-  outReads[15] = scheduleSpout_1;
-  outReads[16] = timePlate_0;
-  outReads[17] = timeOut;
-  outReads[18] = experiment;
-  outReads[18] = millis();
-
-//  Serial.println((String)
-//                   outReads[0] + "," +
-//                   outReads[1] + "," +
-//                   outReads[2] + "," +
-//                   outReads[3] + "," +
-//                   outReads[4] + "," +
-//                   outReads[5] + "," +
-//                   outReads[6] + "," +
-//                   outReads[7] + "," +
-//                   outReads[8] + "," +
-//                   outReads[9] + "," +
-//                   outReads[10] + "," +
-//                   outReads[11] + "," +
-//                   outReads[12] + "," +
-//                   outReads[13] + "," +
-//                   outReads[14] + "," +
-//                   outReads[15] + "," +
-//                   outReads[16] + "," +
-//                   outReads[17] + "," +
-//                   outReads[18]
-//                );
 
 
 }

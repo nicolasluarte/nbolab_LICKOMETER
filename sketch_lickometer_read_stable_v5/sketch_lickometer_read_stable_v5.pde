@@ -83,7 +83,7 @@ class Button {
 }
 // VARIABLES
 // Define variables for serial commmunication
-Serial[] mySerialPorts = new Serial[4];
+Serial[] mySerialPorts = new Serial[64];
 String[] myPorts; // Array to store serial ports  
 int[] myPortsIndex; // array to store pointers for ports
 int[] myArdIndex = new int[4]; // stores port information for each arduino, based on position within array.
@@ -265,13 +265,13 @@ void portMenu() {
     portBox[i].render(xref - 60, (yref - 20) + i * 40);
     buttonTest[i].render(xref - 30, (yref - 20) + i * 40, 20,20);
     fill(0);
-    textAlign(LEFT, BOTTOM); text(myPorts[i], xref, yref + i * 40);
+    textAlign(LEFT, BOTTOM); text("T", xref, yref + i * 40);
    
     // If clicked, add port to the active list
     if (portBox[i].b && myPortsIndex[i] == 999) {
       myArdIndex[index] = i;
       myPortsIndex[i] = index;    
-      mySerialPorts[index] = new Serial(this, myPorts[i], 9600);
+      mySerialPorts[index] = new Serial(this, "/dev/ttyUSB0", 9600);
       index++;     
       }  
     }
