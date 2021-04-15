@@ -61,6 +61,7 @@ void loop() {
   // read experimental setup
   recvWithStartEndMarkers(); // read serial port store into setup array
   experiment = receivedChars[0] - '0';
+  if (experiment == 1){
   fr = receivedChars[1];
   spout_0 = receivedChars[2] - '0';
   spout_1 = receivedChars[3] - '0';
@@ -73,6 +74,8 @@ void loop() {
   goBlink = receivedChars[10] - '0';
   blinkSensor = receivedChars[11] - '0';
   testMotors = receivedChars[12] - '0';
+  experiment = 0;
+  }
 
   // test stuff goes here
   if (goBlink == 1) {
@@ -86,11 +89,13 @@ void loop() {
       plate.trialLed.on();
       delay(100);
     }
+    goBlink = 0;
   }
 
   if (testMotors == 1) {
     spout0.deliverLiquid();
     spout1.deliverLiquid();
+    testMotors = 0;
   }
 
   switch (blinkSensor) {
@@ -116,6 +121,8 @@ void loop() {
 
   // create ratios, TODO: PR
   if (newSetup == 1) {
+    
+    
     // spout 0
     spout0Flag.setRatio(fr);
     spout0Flag.setParadigm(scheduleSpout_0);
