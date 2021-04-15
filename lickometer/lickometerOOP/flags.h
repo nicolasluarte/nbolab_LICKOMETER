@@ -23,6 +23,7 @@ class flags {
     void setEventChanged();
     unsigned long eventMs();
     bool timeOut(int timeOutMs);
+    void resetAll();
 
 
   private:
@@ -163,4 +164,8 @@ int flags::isEvent(int validLickSum) {
   }
   _lastEvent = _event;
   return _event;
+}
+
+void flags::resetAll(){
+  _totalEvents = 0;
 }

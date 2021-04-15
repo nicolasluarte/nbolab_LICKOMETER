@@ -35,6 +35,7 @@ class sensors: public Adafruit_MPR121 {
     void sensorOn(); // turn on (for counting valid licks)
     void resetSum();
     void deliverLiquid();
+    void resetAll();
 
   private:
     int _pin; // the pin where the sensor is connected
@@ -176,4 +177,10 @@ int sensors::lastStatus()
 // retrieves the last status
 {
   return _lastStatus;
+}
+
+void sensors::resetAll(){
+  _validStatusSum = 0;
+  _validStatusSumReset = 0;
+  _statusSum = 0;
 }

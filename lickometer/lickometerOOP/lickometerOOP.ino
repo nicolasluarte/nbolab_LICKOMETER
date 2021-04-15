@@ -41,7 +41,7 @@ unsigned long outReads[32];
 
 void setup() {
   // set serial communications
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   // needed to keep leonardo/micro from starting too fast!
   while (!Serial) {
@@ -58,31 +58,10 @@ void setup() {
 }
 
 void loop() {
-  //
-  //  S1.sense();
-  //  S1.sensorOn();
-  //  L1.sense();
-  //  Serial.print(S1.statusSum());
-  //  Serial.print(" ");
-  //  Serial.print(flag.totalEvents());
-  //  Serial.print(" ");
-  //  Serial.println(flag.ratio());
-  //  if (flag.paradigm() == "RR") {
-  //    if (flag.isEvent(S1.validStatusSumReset()) == 1) {
-  //      S1.resetSum();
-  //      flag.createRatio();
-  //    }
-  //  }
-  //  else if (flag.paradigm() == "FR"){
-  //    flag.isEvent(S1.validStatusSum());
-  //  }
-  // <1511111111>
-
-
   // read experimental setup
   recvWithStartEndMarkers(); // read serial port store into setup array
   experiment = receivedChars[0] - '0';
-  fr = receivedChars[1] - '0';
+  fr = receivedChars[1];
   spout_0 = receivedChars[2] - '0';
   spout_1 = receivedChars[3] - '0';
   plate_0 = receivedChars[4] - '0';
@@ -109,7 +88,7 @@ void loop() {
     }
   }
 
-  if (testMotors == 1){
+  if (testMotors == 1) {
     spout0.deliverLiquid();
     spout1.deliverLiquid();
   }
@@ -147,6 +126,14 @@ void loop() {
     spout1Flag.setParadigm(scheduleSpout_1);
     spout1Flag.createRatio();
 
+    // reset all
+    spout0Flag.resetAll();
+    spout1Flag.resetAll();
+    plateFlag.resetAll();
+    spout0.resetAll();
+    spout1.resetAll();
+    plate.resetAll();
+
     newSetup = 0;
     receivedChars[9] = 0;
   }
@@ -182,7 +169,7 @@ void loop() {
     spout0Flag.lickometerOff();
     spout0.resetSum();
     if (plate.held() > timePlate_0 || timePlate_0 == 0) plateFlag.setHeldValid(true);
-    if (timePlate_0 != 1) plate.trialLed.on();
+    if (timePlate_0 != 0) plate.trialLed.on(), plateFlag.lickometerOn();
   }
 
   // spout 1 control
@@ -203,7 +190,7 @@ void loop() {
     spout1Flag.lickometerOff();
     spout1.resetSum();
     if (plate.held() > timePlate_0 || timePlate_0 == 0) plateFlag.setHeldValid(true);
-    if (timePlate_0 != 1) plate.trialLed.on();
+    if (timePlate_0 != 0) plate.trialLed.on(), plateFlag.lickometerOn();
   }
 
 
@@ -225,29 +212,30 @@ void loop() {
   outReads[16] = timePlate_0;
   outReads[17] = timeOut;
   outReads[18] = experiment;
-  outReads[18] = millis();
-
-//  Serial.println((String)
-//                   outReads[0] + "," +
-//                   outReads[1] + "," +
-//                   outReads[2] + "," +
-//                   outReads[3] + "," +
-//                   outReads[4] + "," +
-//                   outReads[5] + "," +
-//                   outReads[6] + "," +
-//                   outReads[7] + "," +
-//                   outReads[8] + "," +
-//                   outReads[9] + "," +
-//                   outReads[10] + "," +
-//                   outReads[11] + "," +
-//                   outReads[12] + "," +
-//                   outReads[13] + "," +
-//                   outReads[14] + "," +
-//                   outReads[15] + "," +
-//                   outReads[16] + "," +
-//                   outReads[17] + "," +
-//                   outReads[18]
-//                );
+  outReads[19] = millis();
+  //
+    Serial.println((String)
+                     outReads[0] + "," +
+                     outReads[1] + "," +
+                     outReads[2] + "," +
+                     outReads[3] + "," +
+                     outReads[4] + "," +
+                     outReads[5] + "," +
+                     outReads[6] + "," +
+                     outReads[7] + "," +
+                     outReads[8] + "," +
+                     outReads[9] + "," +
+                     outReads[10] + "," +
+                     outReads[11] + "," +
+                     outReads[12] + "," +
+                     outReads[13] + "," +
+                     outReads[14] + "," +
+                     outReads[15] + "," +
+                     outReads[16] + "," +
+                     outReads[17] + "," +
+                     outReads[18] + "," +
+                     outReads[19] + ","
+                  );
 
 
 }
