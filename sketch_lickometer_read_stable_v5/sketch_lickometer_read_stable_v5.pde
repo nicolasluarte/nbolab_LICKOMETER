@@ -259,19 +259,19 @@ void portMenu() {
   fill(150); rect(600,50,300,100);
   fill(0); textSize(18); text(s, 600, 50, 300, 100);  // Text wraps within text box
   
-  // Display port information and checkboxes
+  // Display port information and checkboxes3
   textSize(20); textAlign(LEFT, BOTTOM);
   for (int i = 0; i <= myPorts.length - 1; i++) { 
     portBox[i].render(xref - 60, (yref - 20) + i * 40);
     buttonTest[i].render(xref - 30, (yref - 20) + i * 40, 20,20);
     fill(0);
-    textAlign(LEFT, BOTTOM); text("T", xref, yref + i * 40);
+    textAlign(LEFT, BOTTOM); text(myPorts[i], xref, yref + i * 40);
    
     // If clicked, add port to the active list
     if (portBox[i].b && myPortsIndex[i] == 999) {
       myArdIndex[index] = i;
       myPortsIndex[i] = index;    
-      mySerialPorts[index] = new Serial(this, "/dev/ttyUSB0", 9600);
+      mySerialPorts[index] = new Serial(this, myPorts[i], 9600);
       index++;     
       }  
     }
