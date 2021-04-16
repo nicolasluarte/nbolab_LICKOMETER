@@ -100,8 +100,8 @@ int flagActive[3] = {0, 0, 0}; // This indicates which drinking tube is active -
 *************************************************************************/
 // SETUP
 void setup() {
-  // Initialize serial @ 9600 bits per second
-  Serial.begin(9600);
+  // Initialize serial @ 115200 bits per second
+  Serial.begin(115200);
 
   // needed to keep leonardo/micro from starting too fast!
   while (!Serial) {
@@ -188,11 +188,10 @@ void loop() {
             MotorArray[i]->step(motorSteps[i], FORWARD, MICROSTEP); // motor ON
             MotorArray[i]->release();
             analogWrite(ledMotor[i], 0); // cue-delivery light OFF
-            liquidDelivered[i] = 1;
+            ++liquidDelivered[i];
           }
           else{
             analogWrite(ledMotor[i], 0);
-            liquidDelivered[i] = 0;
           }
 
 

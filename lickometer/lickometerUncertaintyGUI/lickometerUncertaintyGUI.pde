@@ -109,7 +109,21 @@ short LF = 10;        // ASCII linefeed
 PFont f;              // Declare PFont variable
 
 // output for file
-PrintWriter outputEvents;
+//PrintWriter outputEvents;
+// Create output files  
+Table outputEvents;
+String fileNameEvents = "data/" +
+  "experimental_log_" +
+  day() +
+  month() +
+  year() +
+  "_" +
+  hour() +
+  ":" +
+  minute() +
+  ":" +
+  second() +
+  ".csv";
 
 // Variables for control of experiment
 int[] pause = {1, 1, 1, 1}; // One for each arduino
@@ -153,7 +167,7 @@ void setup() {
 
   // List all the available serial ports
 
-   // to get only relevant ports useful for OS compatibility
+  // to get only relevant ports useful for OS compatibility
   String[] p = Serial.list();
   ArrayList<String> tmp = new ArrayList<String>();
   for (int i = 0; i < p.length; i++) {
@@ -162,11 +176,11 @@ void setup() {
     }
   }
   myPorts = new String[tmp.size()];
-  for (int i = 0; i < tmp.size(); i++){
+  for (int i = 0; i < tmp.size(); i++) {
     myPorts[i] = tmp.get(i);
   }
   myPortsSize = myPorts.length;
-  
+
   myPortsIndex = new int[myPorts.length]; // This is just for reference display
   for (int i = 0; i < myPorts.length; i++) {
     myPortsIndex[i] = 999;
@@ -222,15 +236,23 @@ void setup() {
     }
   } 
 
-  // Create output files  
-  String fileNameEvents = getTimeStamp() + "events_.txt";
-  outputEvents = createWriter(fileNameEvents);
+
+  //outputEvents = createWriter(fileNameEvents);
+  outputEvents = new Table();
+  outputEvents.addColumn("date");
+  outputEvents.addColumn("pcTime");
+  outputEvents.addColumn("msFromStart");
+  outputEvents.addColumn("arduinoNumber");
+  outputEvents.addColumn("spoutNumber");
+  outputEvents.addColumn("licksCum");
+  outputEvents.addColumn("eventsCum");
+  outputEvents.addColumn("rewardsCum");
 }
 
 void draw() {
   // Update output
-  outputEvents.flush();
-
+  //outputEvents.flush();
+  saveTable(outputEvents, fileNameEvents);
   hideList();  
   switch(currentMenu) {
   case 1: 
@@ -292,7 +314,7 @@ void portMenu() {
   textSize(20); 
   textAlign(LEFT, BOTTOM);
 
-  for (int i = 0; i < myPortsSize ; i++) { 
+  for (int i = 0; i < myPortsSize; i++) { 
     portBox[i].render(xref - 60, (yref - 20) + i * 40);
     buttonTest[i].render(xref - 30, (yref - 20) + i * 40, 20, 20);
     fill(0);
@@ -303,7 +325,7 @@ void portMenu() {
     if (portBox[i].b && myPortsIndex[i] == 999) {
       myArdIndex[index] = i;
       myPortsIndex[i] = index;    
-      mySerialPorts[index] = new Serial(this, myPorts[i], 9600);
+      mySerialPorts[index] = new Serial(this, myPorts[i], 115200);
       index++;
     }
   }
@@ -504,7 +526,7 @@ void drawInfoPanel(int ardIndex, String Port, int xref, int yref) {
   for (int i = 0; i < 3; i++) { 
     text(dtubeEvents[ardIndex][i], xref + 425, ypos[i]);
   }
-  
+
   // Rewards
   fill(0); 
   for (int i = 0; i < 3; i++) { 
@@ -532,7 +554,7 @@ void drawInfoPanel(int ardIndex, String Port, int xref, int yref) {
 }
 
 // This function reads the event from serial Port and catches the information
-void serialEvent(Serial p) {   
+void serialEvent(Serial p) {  
   int[] sensorInt = new int[9]; // initialize array - fthere are three pairs of [lick, flag, liquidDelivered] 
   String message = p.readStringUntil(LF); // read serial data
   if (message != null) {   
@@ -567,7 +589,7 @@ void serialEvent(Serial p) {
       if (flag == "1") {
         int[][] index = { {0, 3, 6}, // Index to iterate over licks - columns are sensor per arduino
           {1, 4, 7}, // Index to iterate for intake events
-        {2, 5, 8}}; // Index to iterate for rewards
+          {2, 5, 8}}; // Index to iterate for rewards
 
         for (int i = 0; i < 3; i++) {
           int touchIndex = index[0][i]; // position within message for touch status
@@ -606,14 +628,19 @@ void serialEvent(Serial p) {
           }
 
           // Print Events data file - This is the processed information
-          if (licksFlag == 1 || eventsFlag == 1) {
-            String infoLineEvents = getTimeStamp() + "," +
-            ardIndex + "," +
-            i +  "," +
-            dtubeLicks[ardIndex][i] + "," +
-            dtubeEvents[ardIndex][i] + "," +
-            dtubeReward[ardIndex][i];
-            outputEvents.println(infoLineEvents); // Write the raw data to the file
+
+          String[] timeData = getTimeStamp();
+          TableRow newRow = outputEvents.addRow();
+          newRow.setString("date", timeData[0]);
+          newRow.setString("pcTime", timeData[1]);
+          newRow.setString("msFromStart", timeData[2]);
+          newRow.setInt("arduinoNumber", ardIndex);
+          newRow.setInt("spoutNumber", i);
+          newRow.setInt("licksCum", dtubeLicks[ardIndex][i]);
+          newRow.setInt("eventsCum", dtubeEvents[ardIndex][i]);
+          newRow.setInt("rewardsCum", dtubeReward[ardIndex][i]);
+
+          if (eventsFlag == 1 || licksFlag == 1) {
             eventsFlag = 0;
             licksFlag = 0;
           }
@@ -625,8 +652,10 @@ void serialEvent(Serial p) {
 
 
 // Get current date and time
-String getTimeStamp() {  
-  String timestamp = year() + nf(month(), 2) + nf(day(), 2) + ","  + nf(hour(), 2) + nf(minute(), 2) + nf(second(), 2) + "," + nf(millis(), 0);
+String[] getTimeStamp() {  
+  String[] timestamp = {year() + nf(month(), 2) + nf(day(), 2), 
+    nf(hour(), 2) + nf(minute(), 2) + nf(second(), 2), 
+    nf(millis(), 0)};
   return(timestamp);
 }
 
@@ -649,8 +678,8 @@ color trafficLight(int i) {
 }
 
 void exit() {
-  outputEvents.flush();
-  outputEvents.close();
+  //outputEvents.flush();
+  //outputEvents.close();
   super.exit();
 }
 
