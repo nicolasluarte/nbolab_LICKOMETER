@@ -101,6 +101,7 @@ int[][] dtubeReward = new int [4][3]; // show if the event was rewarded or not
 // define arrays to store licks and event information from each drinking tube - This is the information that goes into the Events data file
 int[][] dtubeLicks = new int[4][3]; // store real time drinking tube licks - Licks are defined based on when the 
 int[][] dtubeEvents = new int[4][3]; // store cumulative drinking tube touches
+int[][] dtubeRandomSpout = new int[4][3]; // tells which of the spout is random
 
 // Variables for message decoding from arduino
 char HEADER = 'H';    // character to identify the start of a message
@@ -199,6 +200,7 @@ void setup() {
       dtubeLicks[i][j] = 0; 
       dtubeEvents[i][j] = 0;
       dtubeReward[i][j] = 0;
+      dtubeRandomSpout[i][j] = 0;
       spoutActive[i][j] = false;
     }
   }
@@ -247,6 +249,7 @@ void setup() {
   outputEvents.addColumn("licksCum");
   outputEvents.addColumn("eventsCum");
   outputEvents.addColumn("rewardsCum");
+  outputEvents.addColumn("randomSpout");
 }
 
 void draw() {
@@ -433,7 +436,11 @@ void drawConfigPanel(int ardIndex, String Port, int xref, int yref) {
     int q = i + 1;
     fill(0); 
     textAlign(LEFT, BOTTOM); 
-    text("BEBEDERO " + q, xref + 10, yref + 150 + i * 30); // Titles of bebederos    
+    if (i == 1) {
+      text("PLATE ", xref + 10, yref + 150 + i * 30); // Titles of bebederos
+    } else {
+      text("BEBEDERO " + q, xref + 10, yref + 150 + i * 30); // Titles of bebederos
+    }
     configActiveBox[ardIndex][i].render(xref + 150, (yref - 20) + 150 + i * 30);
     buttonTimeAssign[ardIndex][i].render(xref + 180, (yref - 20) + 150 + i * 30, 20, 20);
 
@@ -455,7 +462,6 @@ void drawInfoPanel(int ardIndex, String Port, int xref, int yref) {
   text("ARDUINO " + ardIndex, xref + 10, yref + 20); // Include port
   fill(0); 
   text(Port, xref + 10, yref + 40); // Include port
-
   // Change font to print information
   textFont(f, 16); // Specify font to be used
 
@@ -498,7 +504,11 @@ void drawInfoPanel(int ardIndex, String Port, int xref, int yref) {
   for (int i = 0; i < 3; i++) {
     int q = i + 1;
     fill(0);
-    text("BEBEDERO " + q, xref+25, ypos[i]); // Titles of bebederos
+    if (i == 1) {
+      text("PLATE ", xref+25, ypos[i]); // Titles of bebederos
+    } else {
+      text("BEBEDERO " + q, xref+25, ypos[i]); // Titles of bebederos
+    }
 
     // Activate traffic light index for activity
     int s = 0; 
@@ -555,16 +565,17 @@ void drawInfoPanel(int ardIndex, String Port, int xref, int yref) {
 
 // This function reads the event from serial Port and catches the information
 void serialEvent(Serial p) {  
-  int[] sensorInt = new int[9]; // initialize array - fthere are three pairs of [lick, flag, liquidDelivered] 
+  int[] sensorInt = new int[12]; // initialize array - fthere are three pairs of [lick, flag, liquidDelivered] 
   String message = p.readStringUntil(LF); // read serial data
   if (message != null) {   
     print(message);
     String [] data  = message.split(","); // Split the comma-separated message. This should have eight characters to be a valid message
-    if (data[0].charAt(0) == HEADER && data.length == 11) {      // check for header character in the first field       
+    if (data[0].charAt(0) == HEADER && data.length == 14) {      // check for header character in the first field       
       for ( int i = 1; i < data.length-1; i++) { // skip the header and terminating cr and lf
         int q = i - 1;
         sensorInt[q] = Integer.parseInt(data[i]);
-      }      
+      }
+
 
       int ardIndex = 0; 
       String flag = "0";                  
@@ -587,17 +598,20 @@ void serialEvent(Serial p) {
 
       // This flag indicates that data should be collected
       if (flag == "1") {
-        int[][] index = { {0, 3, 6}, // Index to iterate over licks - columns are sensor per arduino
-          {1, 4, 7}, // Index to iterate for intake events
-          {2, 5, 8}}; // Index to iterate for rewards
-
+        int[][] index = { {0, 4, 8}, // Index to iterate over licks - columns are sensor per arduino
+          {1, 5, 9}, // Index to iterate for intake events
+          {2, 6, 10}, // Index to iterate for rewards
+          {3, 7, 11}}; // Index to iterate for random spout
         for (int i = 0; i < 3; i++) {
           int touchIndex = index[0][i]; // position within message for touch status
           int flagIndex = index[1][i]; // position within message for flag status
           int rewardIndex = index[2][i];
+          int randomIndex = index[3][i];
           dtubeTouchCurrent[ardIndex][i] = sensorInt[touchIndex]; // get current touch status
           dtubeFlagCurrent[ardIndex][i] = sensorInt[flagIndex]; // get current touch status
           dtubeReward[ardIndex][i] = sensorInt[rewardIndex]; // get if event was rewarded
+          dtubeRandomSpout[ardIndex][i] = sensorInt[randomIndex]; // check which one is the random spout
+
 
           /* UPDATE TOUCH STATUS AND NUMBER OF LICKS */
           int licksFlag = 0;
@@ -639,6 +653,7 @@ void serialEvent(Serial p) {
           newRow.setInt("licksCum", dtubeLicks[ardIndex][i]);
           newRow.setInt("eventsCum", dtubeEvents[ardIndex][i]);
           newRow.setInt("rewardsCum", dtubeReward[ardIndex][i]);
+          newRow.setInt("randomSpout", dtubeRandomSpout[ardIndex][i]);
 
           if (eventsFlag == 1 || licksFlag == 1) {
             eventsFlag = 0;

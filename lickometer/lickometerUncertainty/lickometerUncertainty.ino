@@ -79,6 +79,7 @@ int tubeIndex;
 uint8_t licksRT[3] = {0, 0, 0}; // array that contains the current state of the sensor, 0 is not touched and 1 is touched
 uint8_t licksCM[3] = {0, 0, 0}; // Cumulative licks per animal to store until trigger
 int liquidDelivered[3] = {0, 0, 0}; // keeps track if liquid was delivered or not
+int randomSpout[3] = {1, 0, 1} ; // set the random spout
 
 // Variables de control interno de motores. NO MODIFICAR!!!
 uint16_t motorSteps[3] = {12, 12, 12}; // Number of steps - this is calibrated for a 20 mL syringue
@@ -136,7 +137,7 @@ void setup() {
   pinMode(ledMotor[1], OUTPUT);
   pinMode(ledMotor[2], OUTPUT);
 
-//  randomSeed(analogRead(A0)); // read a pin to generate a random seed, pin must not be used
+  randomSeed(analogRead(A0)); // read a pin to generate a random seed, pin must not be used
 }
 
 // VOID LOOP
@@ -158,6 +159,7 @@ void loop() {
       Serial.print(licksRT[i]); Serial.print(",");
       Serial.print(flag[i]); Serial.print(",");
       Serial.print(liquidDelivered[i]); Serial.print(",");
+      Serial.print(randomSpout[i]); Serial.print(",");
     }
     Serial.println();
 
@@ -183,17 +185,27 @@ void loop() {
 
 
           randomNumber = random(0, 2);
-          if (randomNumber > PROBABILITY) {
-            // Deliver liquid through motor
-            MotorArray[i]->step(motorSteps[i], FORWARD, MICROSTEP); // motor ON
-            MotorArray[i]->release();
-            analogWrite(ledMotor[i], 0); // cue-delivery light OFF
-            ++liquidDelivered[i];
-          }
-          else{
-            analogWrite(ledMotor[i], 0);
-          }
-
+	  // checks if the current spout should be random or not
+	  if (randomSpout[i] == 1){
+		  if (randomNumber > PROBABILITY) {
+		    // Deliver liquid through motor
+		    MotorArray[i]->step(motorSteps[i], FORWARD, MICROSTEP); // motor ON
+		    MotorArray[i]->release();
+		    analogWrite(ledMotor[i], 0); // cue-delivery light OFF
+		    ++liquidDelivered[i];
+		  }
+		  else{
+		    analogWrite(ledMotor[i], 0);
+		  }
+	  }
+	  // the current spout is not random so program runs as usual
+	  else{
+		    // Deliver liquid through motor
+		    MotorArray[i]->step(motorSteps[i], FORWARD, MICROSTEP); // motor ON
+		    MotorArray[i]->release();
+		    analogWrite(ledMotor[i], 0); // cue-delivery light OFF
+		    ++liquidDelivered[i];
+	  }
 
           // reset counter of cumulative lick counter
           licksCM[i] = 0;
