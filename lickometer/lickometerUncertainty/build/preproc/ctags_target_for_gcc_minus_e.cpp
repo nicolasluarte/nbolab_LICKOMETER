@@ -1,3 +1,4 @@
+# 1 "/home/nicoluarte/nbolab_LICKOMETER/lickometer/lickometerUncertainty/lickometerUncertainty.ino"
 /*********************************************************
   PROGRAMAS: FR (fixed ratio) para bombas
   Fecha: Noviembre 13, 2020
@@ -12,9 +13,9 @@
   Escrito por Claudio Perez-Leighton.
 **********************************************************/
 // Libraries codes
-#include <Wire.h> // conectividad general
-#include "Adafruit_MPR121.h" //  MPR121 breakout board library - capacitance sensor
-#include <Adafruit_MotorShield.h> // Library for Adafruit MotorShield v2 - motor control
+# 16 "/home/nicoluarte/nbolab_LICKOMETER/lickometer/lickometerUncertainty/lickometerUncertainty.ino" 2
+# 17 "/home/nicoluarte/nbolab_LICKOMETER/lickometer/lickometerUncertainty/lickometerUncertainty.ino" 2
+# 18 "/home/nicoluarte/nbolab_LICKOMETER/lickometer/lickometerUncertainty/lickometerUncertainty.ino" 2
 
 /**********************************************************
   OPERATIVE VARIABLES FOR LICKOMETER
@@ -23,9 +24,9 @@
 Adafruit_MPR121 cap = Adafruit_MPR121();
 
 // I do not know what this is, but it's in all codes associated to MPR121
-#ifndef _BV
-#define _BV(bit) (1 << (bit))
-#endif
+
+
+
 
 // Keeps track of the last pins touched so we know when buttons are 'released'
 uint16_t lasttouched = 0; // uint16_t are integers of up to 16 bits.
@@ -44,7 +45,7 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield(); // define variable that refe
 
 // Connect a stepper motor with 200 steps per revolution (1.8 degree)
 // to motor port #2 (M3 and M4)
-Adafruit_StepperMotor*  MotorArray[3]; // Declare array of motor
+Adafruit_StepperMotor* MotorArray[3]; // Declare array of motor
 Adafruit_StepperMotor *Motor1 = AFMS.getStepper(200, 1); // ports M1 and M2 of motorshield
 Adafruit_StepperMotor *Motor2 = AFMS.getStepper(200, 2); // ports M3 and M4 of motorshield
 
@@ -64,7 +65,7 @@ unsigned long timeLED_OFF[3] = {20000, 20000, 20000}; // This works for each LED
 
 // NO MODIFICAR ESTAS VARIABLES
 // Variables for serial communication
-int tubeIndexArray[8][3]  = {  {0, 0, 0},
+int tubeIndexArray[8][3] = { {0, 0, 0},
     {1, 0, 0},
     {0, 1, 0},
     {0, 0, 1},
@@ -126,16 +127,16 @@ void setup() {
 
     // Agregar items a array de motor.
     // IMPORTANTE: La posición del medio del array esta vacia y por lo tanto no tiene ninguna acción. Debiera modificarse en versiones futuras
-    AFMS.begin();  // create with the default frequency 1.6KHz
+    AFMS.begin(); // create with the default frequency 1.6KHz
     MotorArray[0] = Motor1;
     MotorArray[2] = Motor2;
     MotorArray[0]->setSpeed(50); // 50 revolutions per second
     MotorArray[2]->setSpeed(50); // 50 revolutions per second
 
     // pinMODE for LED
-    pinMode(ledMotor[0], OUTPUT);
-    pinMode(ledMotor[1], OUTPUT);
-    pinMode(ledMotor[2], OUTPUT);
+    pinMode(ledMotor[0], 0x1);
+    pinMode(ledMotor[1], 0x1);
+    pinMode(ledMotor[2], 0x1);
 
     randomSeed(analogRead(A0)); // read a pin to generate a random seed, pin must not be used
 }
@@ -144,7 +145,7 @@ void setup() {
 void loop() {
     // Condition to test for connection from processing
     if (flagStart == 0) {
-        TestConfigContact();  // Read Serial port to trigger test of lights
+        TestConfigContact(); // Read Serial port to trigger test of lights
     }
 
     if (flagStart == 1) {
@@ -174,12 +175,12 @@ void loop() {
                 flagLED[i] = 0;
             } else {
                 // CASE 2: If tube is active but I am within a time off.
-                if (flag[i] == 0  && flagActive[i] == 1) {
+                if (flag[i] == 0 && flagActive[i] == 1) {
                     analogWrite(ledMotor[i], powerLED); // turn cue-delivery light OFF
                     flagLED[i] = 1;
                 }
                 // CASE 3: Check if trigger has been delivered
-                if (licksCM[i] % licksActive[i] == 0 && licksCM[i] != 0 && flag[i] == 0 && flagActive[i] == 1) {  // This is to prevent bugs to trigger pause while already on a pause
+                if (licksCM[i] % licksActive[i] == 0 && licksCM[i] != 0 && flag[i] == 0 && flagActive[i] == 1) { // This is to prevent bugs to trigger pause while already on a pause
                     timeStart[i] = millis();
 
                     // Update flags
@@ -193,7 +194,7 @@ void loop() {
                     if (randomSpout[i] == 1) {
                         if (randomNumber > PROBABILITY) {
                             // Deliver liquid through motor
-                            MotorArray[i]->step(motorSteps[i], FORWARD, MICROSTEP); // motor ON
+                            MotorArray[i]->step(motorSteps[i], 1, 4); // motor ON
                             MotorArray[i]->release();
                             analogWrite(ledMotor[i], 0); // cue-delivery light OFF
                             ++liquidDelivered[i];
@@ -205,7 +206,7 @@ void loop() {
                     // the current spout is not random so program runs as usual
                     else {
                         // Deliver liquid through motor
-                        MotorArray[i]->step(motorSteps[i], FORWARD, MICROSTEP); // motor ON
+                        MotorArray[i]->step(motorSteps[i], 1, 4); // motor ON
                         MotorArray[i]->release();
                         analogWrite(ledMotor[i], 0); // cue-delivery light OFF
                         ++liquidDelivered[i];
@@ -216,7 +217,7 @@ void loop() {
                 } // close if
 
                 // CASE 4: Determine if time out is over and LED needs to be turned ON
-                if (flag[i] == 1  && flagActive[i] == 1) {
+                if (flag[i] == 1 && flagActive[i] == 1) {
                     timeEnd = millis();
                     // Check if LED has to be turned ON
                     if (timeEnd - timeStart[i] >= timeLED_OFF[i] && flagLED[i] == 0) {
@@ -233,4 +234,136 @@ void loop() {
         } // close loop
     } // close if on flagStart
 } // close void_loop
+# 1 "/home/nicoluarte/nbolab_LICKOMETER/lickometer/lickometerUncertainty/functions.ino"
+// This function waits until it hears from Serial about starting the collection protocol
+void TestConfigContact() {
+    if (Serial.available()) { // If data is available to read,
+        char val = Serial.read(); // read it and store it in val
+        // This test connection from Processing by flicking all three LEDS
+        if (val == 'T') {
+            blinkTubeLights(1000, true);
+        }
 
+        // This updates the status of the LEDS
+        if (val >= '0' && val <= '9') { // is this an ascii digit between 0 and 9?
+            tubeIndex = (val - '0');
+            flagActive[0] = tubeIndexArray[tubeIndex][0];
+            flagActive[1] = tubeIndexArray[tubeIndex][1];
+            flagActive[2] = tubeIndexArray[tubeIndex][2];
+            blinkTubeLights(500, false);
+        }
+
+        // Activates all pumps and lights for 5 seconds
+        if (val == 'B') {
+
+            // Iterate over pumps and lights
+            for (uint8_t i = 0; i < 3; i++) {
+                if (flagActive[i] == 1) {
+                    MotorArray[i]->setSpeed(200); // RPM
+                    MotorArray[i]->step(400, 1, 1); // motor ON for three revolutions
+                    analogWrite(ledMotor[i], 25); // cue-delivery light ON
+                }
+            }
+            delay(500); // I do not care about blocking code because the program should not be doing anything else right now, so blocking the code is fine
+            for (uint8_t i = 0; i < 3; i++) {
+                if (flagActive[i] == 1) {
+                    MotorArray[i]->release();
+                    MotorArray[i]->setSpeed(50); // 50 revolutions per second
+                    analogWrite(ledMotor[i], 0); // cue-delivery light OFF
+                }
+            }
+        }
+
+        // Starts test
+        if (val == 'S') { // valid header
+            flagStart = 1; // Start Test
+        }
+    }
+}
+
+void testTubeStatus() {
+    if (Serial.available() > 0) { // If data is available to read,
+        char val = Serial.read(); // read it and store it in val
+        if (val >= '0' && val <= '9') { // is this an ascii digit between 0 and 9?
+            tubeIndex = (val - '0');
+            flagActive[0] = tubeIndexArray[tubeIndex][0];
+            flagActive[1] = tubeIndexArray[tubeIndex][1];
+            flagActive[2] = tubeIndexArray[tubeIndex][2];
+        }
+    }
+}
+
+void blinkTubeLights(int Delay, boolean flag) {
+    // Iterate over each drinking tube and blink each light three times
+    for (int i = 0; i < 3; i++) {
+        if (flag) {
+            for (int q = 0; q < 3; q++) {
+                analogWrite(ledMotor[q], 25);
+            }
+        } else {
+            for (int q = 0; q < 3; q++) {
+                if (flagActive[q] == 1) {
+                    analogWrite(ledMotor[q], 25);
+                }
+            }
+        }
+        delay(Delay); // I do not care about blocking code because the program should not be doing anything else right now.
+        for (int q = 0; q < 3; q++) {
+            analogWrite(ledMotor[q], 0);
+        }
+        delay(Delay); // I do not care about blocking code because the program should not be doing anything else right now.
+    }
+}
+
+
+// This function by default checks the three sensors and updates the real-time value of each sensor
+void mpr121_sensor() {
+    currtouched = cap.touched(); // Get currently touched pads
+    for (uint8_t i = 0; i < 3; i++) {
+        if ((currtouched & 
+# 86 "/home/nicoluarte/nbolab_LICKOMETER/lickometer/lickometerUncertainty/functions.ino" 3
+                          (1 << (
+# 86 "/home/nicoluarte/nbolab_LICKOMETER/lickometer/lickometerUncertainty/functions.ino"
+                          i
+# 86 "/home/nicoluarte/nbolab_LICKOMETER/lickometer/lickometerUncertainty/functions.ino" 3
+                          ))
+# 86 "/home/nicoluarte/nbolab_LICKOMETER/lickometer/lickometerUncertainty/functions.ino"
+                                ) && !(lasttouched & 
+# 86 "/home/nicoluarte/nbolab_LICKOMETER/lickometer/lickometerUncertainty/functions.ino" 3
+                                                     (1 << (
+# 86 "/home/nicoluarte/nbolab_LICKOMETER/lickometer/lickometerUncertainty/functions.ino"
+                                                     i
+# 86 "/home/nicoluarte/nbolab_LICKOMETER/lickometer/lickometerUncertainty/functions.ino" 3
+                                                     ))
+# 86 "/home/nicoluarte/nbolab_LICKOMETER/lickometer/lickometerUncertainty/functions.ino"
+                                                           ) ) {
+            licksRT[i] = 1; // it if *is* touched and *wasnt* touched before, alert!
+            if (flag[i] == 0) {
+                licksCM[i]++;
+            }
+        }
+
+        // Update sensor off
+        if (!(currtouched & 
+# 94 "/home/nicoluarte/nbolab_LICKOMETER/lickometer/lickometerUncertainty/functions.ino" 3
+                           (1 << (
+# 94 "/home/nicoluarte/nbolab_LICKOMETER/lickometer/lickometerUncertainty/functions.ino"
+                           i
+# 94 "/home/nicoluarte/nbolab_LICKOMETER/lickometer/lickometerUncertainty/functions.ino" 3
+                           ))
+# 94 "/home/nicoluarte/nbolab_LICKOMETER/lickometer/lickometerUncertainty/functions.ino"
+                                 ) && (lasttouched & 
+# 94 "/home/nicoluarte/nbolab_LICKOMETER/lickometer/lickometerUncertainty/functions.ino" 3
+                                                     (1 << (
+# 94 "/home/nicoluarte/nbolab_LICKOMETER/lickometer/lickometerUncertainty/functions.ino"
+                                                     i
+# 94 "/home/nicoluarte/nbolab_LICKOMETER/lickometer/lickometerUncertainty/functions.ino" 3
+                                                     ))
+# 94 "/home/nicoluarte/nbolab_LICKOMETER/lickometer/lickometerUncertainty/functions.ino"
+                                                           ) ) {
+            licksRT[i] = 0; // if it *was* touched and now *isnt*, alert!
+        }
+    }
+    // reset our state
+    lasttouched = currtouched;
+}
