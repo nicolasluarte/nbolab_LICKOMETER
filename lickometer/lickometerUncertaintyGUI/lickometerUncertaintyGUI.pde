@@ -642,20 +642,18 @@ void serialEvent(Serial p) {
           }
 
           // Print Events data file - This is the processed information
-
-          String[] timeData = getTimeStamp();
-          TableRow newRow = outputEvents.addRow();
-          newRow.setString("date", timeData[0]);
-          newRow.setString("pcTime", timeData[1]);
-          newRow.setString("msFromStart", timeData[2]);
-          newRow.setInt("arduinoNumber", ardIndex);
-          newRow.setInt("spoutNumber", i);
-          newRow.setInt("licksCum", dtubeLicks[ardIndex][i]);
-          newRow.setInt("eventsCum", dtubeEvents[ardIndex][i]);
-          newRow.setInt("rewardsCum", dtubeReward[ardIndex][i]);
-          newRow.setInt("randomSpout", dtubeRandomSpout[ardIndex][i]);
-
           if (eventsFlag == 1 || licksFlag == 1) {
+            String[] timeData = getTimeStamp();
+            TableRow newRow = outputEvents.addRow();
+            newRow.setString("date", timeData[0]);
+            newRow.setString("pcTime", timeData[1]);
+            newRow.setString("msFromStart", timeData[2]);
+            newRow.setInt("arduinoNumber", ardIndex);
+            newRow.setInt("spoutNumber", i);
+            newRow.setInt("licksCum", dtubeLicks[ardIndex][i]);
+            newRow.setInt("eventsCum", dtubeEvents[ardIndex][i]);
+            newRow.setInt("rewardsCum", dtubeReward[ardIndex][i]);
+            newRow.setInt("randomSpout", dtubeRandomSpout[ardIndex][i]);
             eventsFlag = 0;
             licksFlag = 0;
           }
